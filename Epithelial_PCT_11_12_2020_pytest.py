@@ -11,8 +11,151 @@ from PCT_GLOB_new import *
 print('f',f)
 
 
-def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac):
-    if Transporters_progressive_activation_along_time == 1:
+def BuffPairs_Progres_Activ(BuffPairs_progressive_activation_alongtime, t, T, T_window):
+
+    if BuffPairs_progressive_activation_alongtime == 1:
+        Buffer_Co2_LIS_Param = 0
+        Buffer_Co2_Cell_Param = 0
+        dihydrogen_phosphate_param_e = 0
+        Buffer_HPO4_LIS_Param = 0
+        dihydrogen_phosphate_param_i = 0
+        Buffer_HPO4_CELL_Param = 0
+        dihydrogen_ammonium_param_e = 0
+        Buffer_NH3_LIS_Param = 0
+        dihydrogen_ammonium_param_i = 0
+        Buffer_NH3_CELL_Param = 0
+        dihydroxymethylidene_param_e = 0
+        Buffer_HCO2_LIS_Param = 0
+        dihydroxymethylidene_param_i = 0
+        Buffer_HCO2_CELL_Param = 0
+        Time_Durtn = int(T / T_window)
+        if int(12 * Time_Durtn) < t <= int(13 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            print('BufferPairs_activation at time =' + str(t) if t == 12 * Time_Durtn else '')
+        # elif 12 * Time_Durtn < t <= 13 * Time_Durtn:
+        elif int(13 * Time_Durtn) < t <= int(14 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+        elif int(14 * Time_Durtn) < t <= int(15 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            Buffer_HPO4_CELL_Param = 1
+        elif int(15 * Time_Durtn) < t <= int(16 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_CELL_Param = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+        elif int(16 * Time_Durtn) < t <= int(17 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_CELL_Param = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            dihydrogen_ammonium_param_i = 1
+            Buffer_NH3_CELL_Param = 1
+        elif int(17 * Time_Durtn) < t <= int(18 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_CELL_Param = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            dihydrogen_ammonium_param_i = 1
+            Buffer_NH3_CELL_Param = 1
+            dihydrogen_ammonium_param_e = 1
+            Buffer_NH3_LIS_Param = 1
+        elif int(18 * Time_Durtn) < t <= int(19 * Time_Durtn):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_CELL_Param = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            dihydrogen_ammonium_param_i = 1
+            Buffer_NH3_CELL_Param = 1
+            dihydrogen_ammonium_param_e = 1
+            Buffer_NH3_LIS_Param = 1
+            dihydroxymethylidene_param_i = 1
+            Buffer_HCO2_CELL_Param = 1
+        elif int(19 * Time_Durtn) < t <= int(T):
+            Buffer_Co2_Cell_Param = 1
+            Buffer_Co2_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            Buffer_HPO4_CELL_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_ammonium_param_i = 1
+            Buffer_NH3_CELL_Param = 1
+            dihydrogen_ammonium_param_e = 1
+            Buffer_NH3_LIS_Param = 1
+            dihydroxymethylidene_param_i = 1
+            Buffer_HCO2_CELL_Param = 1
+            dihydroxymethylidene_param_e = 1
+            Buffer_HCO2_LIS_Param = 1
+        else:
+            Buffer_Co2_LIS_Param = 0
+            Buffer_Co2_Cell_Param = 0
+            dihydrogen_phosphate_param_e = 0
+            Buffer_HPO4_LIS_Param = 0
+            dihydrogen_phosphate_param_i = 0
+            Buffer_HPO4_CELL_Param = 0
+            dihydrogen_ammonium_param_e = 0
+            Buffer_NH3_LIS_Param = 0
+            dihydrogen_ammonium_param_i = 0
+            Buffer_NH3_CELL_Param = 0
+            dihydroxymethylidene_param_e = 0
+            Buffer_HCO2_LIS_Param = 0
+            dihydroxymethylidene_param_i = 0
+            Buffer_HCO2_CELL_Param = 0
+        # return Buffer_Co2_LIS_Param, Buffer_Co2_Cell_Param, dihydrogen_phosphate_param_e, Buffer_HPO4_LIS_Param,\
+        #         dihydrogen_phosphate_param_i, Buffer_HPO4_CELL_Param, dihydrogen_ammonium_param_e,  Buffer_NH3_LIS_Param,\
+        #         dihydrogen_ammonium_param_i, Buffer_NH3_CELL_Param, dihydroxymethylidene_param_e,  Buffer_HCO2_LIS_Param,\
+        #         dihydroxymethylidene_param_i, Buffer_HCO2_CELL_Param
+    else:
+        if t >= int(T/2):
+            Buffer_Co2_LIS_Param = 1
+            Buffer_Co2_Cell_Param = 1
+            dihydrogen_phosphate_param_e = 1
+            Buffer_HPO4_LIS_Param = 1
+            dihydrogen_phosphate_param_i = 1
+            Buffer_HPO4_CELL_Param = 1
+            dihydrogen_ammonium_param_e = 1
+            Buffer_NH3_LIS_Param = 1
+            dihydrogen_ammonium_param_i = 1
+            Buffer_NH3_CELL_Param = 1
+            dihydroxymethylidene_param_e = 1
+            Buffer_HCO2_LIS_Param = 1
+            dihydroxymethylidene_param_i = 1
+            Buffer_HCO2_CELL_Param = 1
+            print('Buffers added to the system passing the half part of simulations'+str(t) if t == int(T/2) else '')
+        else:
+            Buffer_Co2_LIS_Param = 0
+            Buffer_Co2_Cell_Param = 0
+            dihydrogen_phosphate_param_e = 0
+            Buffer_HPO4_LIS_Param = 0
+            dihydrogen_phosphate_param_i = 0
+            Buffer_HPO4_CELL_Param = 0
+            dihydrogen_ammonium_param_e = 0
+            Buffer_NH3_LIS_Param = 0
+            dihydrogen_ammonium_param_i = 0
+            Buffer_NH3_CELL_Param = 0
+            dihydroxymethylidene_param_e = 0
+            Buffer_HCO2_LIS_Param = 0
+            dihydroxymethylidene_param_i = 0
+            Buffer_HCO2_CELL_Param = 0
+    return Buffer_Co2_LIS_Param, Buffer_Co2_Cell_Param, dihydrogen_phosphate_param_e, Buffer_HPO4_LIS_Param,\
+           dihydrogen_phosphate_param_i, Buffer_HPO4_CELL_Param, dihydrogen_ammonium_param_e, Buffer_NH3_LIS_Param,\
+           dihydrogen_ammonium_param_i, Buffer_NH3_CELL_Param, dihydroxymethylidene_param_e,  Buffer_HCO2_LIS_Param,\
+               dihydroxymethylidene_param_i, Buffer_HCO2_CELL_Param
+
+
+def Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window):
+    if Transporters_progressive_activation_alongtime == 0:
+        # print('Transporters_progressive_activation_alongtime ',Transporters_progressive_activation_alongtime )
         sglt_mi_param = 0
         nah2po4_mi_param = 0
         clhco3_mi_param = 0
@@ -26,31 +169,33 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
         nah_param = 0
         nak_atp_param = 0
         h_mi_atp_param = 0
-        if 0 < t <= int(4000 * Nfac):
-            if t == int(4000 * Nfac):
-               print('Transporters_activation at time =' + str(int(4000 * Nfac)))
-        elif int(4000 * Nfac) < t <= int(8000 * Nfac):
+        Time_Durtn = int(T / T_window)
+
+        if 0 < t <= Time_Durtn:
+            print('No Transporter Yet at Time_Durtn' if t == Time_Durtn else '')
+        elif Time_Durtn < t <= 2 * Time_Durtn:
             sglt_mi_param = 1
-        elif int(8000 * Nfac) < t <= int(12000 * Nfac):
+            print('sglt_mi_param_activation at time =' + str(Time_Durtn) if t == 2 * Time_Durtn else '')
+        elif 2 * Time_Durtn < t <= 3 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
-        elif int(12000 * Nfac) < t <= int(16000 * Nfac):
+        elif 3 * Time_Durtn < t <= 4 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
-        elif int(16000 * Nfac) < t <= int(20000 * Nfac):
+        elif 4 * Time_Durtn < t <= 5 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
             clhco2_mi_param = 1
-        elif int(20000 * Nfac) < t <= int(24000 * Nfac):
+        elif 5 * Time_Durtn< t <= 6 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
             clhco2_mi_param = 1
             nahco3_is_param = 1
             nahco3_ie_param = 1
-        elif int(24000 * Nfac) < t <= int(28000 * Nfac):
+        elif 6 * Time_Durtn < t <= 7 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
@@ -59,7 +204,7 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
             nahco3_ie_param = 1
             kcl_is_param = 1
             kcl_ie_param = 1
-        elif int(28000 * Nfac) < t <= int(32000 * Nfac):
+        elif 7 * Time_Durtn < t <= 8 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
@@ -70,7 +215,7 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
             kcl_ie_param = 1
             na_clhco3_is_param = 1
             na_clhco3_ie_param = 1
-        elif int(32000 * Nfac) < t <= int(36000 * Nfac):
+        elif 8 * Time_Durtn < t <= 9 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
@@ -82,7 +227,7 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
             na_clhco3_is_param = 1
             na_clhco3_ie_param = 1
             nah_param = 1
-        elif int(36000 * Nfac) < t <= int(40000 * Nfac):
+        elif 9 * Time_Durtn < t <= 10 * Time_Durtn:
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
@@ -96,26 +241,26 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
             nah_param = 1
             nak_atp_param = 1
         else:
-            sglt_mi_param = 1
-            nah2po4_mi_param = 1
-            clhco3_mi_param = 1
-            clhco2_mi_param = 1
-            nahco3_is_param = 1
-            nahco3_ie_param = 1
-            kcl_is_param = 1
-            kcl_ie_param = 1
-            na_clhco3_is_param = 1
-            na_clhco3_ie_param = 1
-            nah_param = 1
-            nak_atp_param = 1
-            h_mi_atp_param = 1
-        return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
-               kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
+            sglt_mi_param = 0
+            nah2po4_mi_param = 0
+            clhco3_mi_param = 0
+            clhco2_mi_param = 0
+            nahco3_is_param = 0
+            nahco3_ie_param = 0
+            kcl_is_param = 0
+            kcl_ie_param = 0
+            na_clhco3_is_param = 0
+            na_clhco3_ie_param = 0
+            nah_param = 0
+            nak_atp_param = 0
+            h_mi_atp_param = 0
+        # return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+        #        kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
     else:
-        if t == int(1000 * Nfac):
+        if t == int(T/4):
             print("NO progressive activation of Transporters along time")
-            print('Transporters added to the system at time=', str(int(1000 * Nfac)))
-        if t > int(1000 * Nfac):
+            print('Transporters added to the system at time=', str(int(T/4)))
+        if t > int(T/4):
             sglt_mi_param = 1
             nah2po4_mi_param = 1
             clhco3_mi_param = 1
@@ -143,9 +288,44 @@ def Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac
             nah_param = 0
             nak_atp_param = 0
             h_mi_atp_param = 0
-        return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
-            kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
-    pass
+    return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+    kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
+
+
+
+def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po4, q_co2, q_h2co3, c_co2, c_h2co3, volume, scale, Co2_Progressive_Activation_Param):
+    if Co2_Progressive_Activation_Param == 1:
+        # print('Buffer activation at time =' + str(int(4000 * Nfac)))
+        # print('Buffer activation for co2, formate, phosphate, and ammonia', 't=', str(t))
+        # co2, formate, phosphate, and ammonia content:
+    #    print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
+        q_hco3 = + q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4
+
+        # LIS: hydration and dhydration of co2
+        # see label {co2_hyd_dhyd}
+        q_co2 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
+        # LIS: see label {conser_charge_co2}
+        q_h2co3 = q_hco3 + q_h2co3 + q_co2
+    #    print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
+    else:
+        # print('No Buffer Effect for co2, formate, phosphate, and ammonia')
+        pass
+    #print('q_hco3,  q_h2co3, q_co2', str(q_hco3),  str(q_h2co3), str(q_co2))
+    return q_hco3,  q_h2co3, q_co2
+
+
+def Buff_Activ(q_h_vary, q_h2_vary, lch, pk, c_h_vary, ebuf_Param, c_h2_vary, Buffer_Activation_Param):
+    if Buffer_Activation_Param == 1:
+        # print('buffer_effect_activate_over_time_for_phosphate', 't=', str(t))
+        # LIS: see label {phosphate}
+        q_h_vary = q_h_vary + q_h2_vary
+        # LIS: see labela {pH_equilibria}, used as paired equations
+        q_h2_vary = ebuf(lch, pk, c_h_vary, c_h2_vary, ebuf_Param)
+        print('Buffer Effect for phosphate')
+    else:
+        print('No Buffer Effect for phosphate')
+        pass
+    return q_h_vary, q_h2_vary
 
 
 def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi):
@@ -415,7 +595,7 @@ def csf(ca, cb, flux, s, param_csf):
         if ca > 0 and cb > 0 and ca - cb != 0:
             return (ca - cb) / (math.log10(ca / cb))
         else:
-            print('ups')
+            #print('ups')
             return cb
     # see label {convective_flux}
     # the input flux is the water fluxes, see label {water_flux}
@@ -798,11 +978,12 @@ def eQs(guess, solver):
     fiks_gluc = fiks_gluc + goldman(his_gluc, ais, z_gluc, vi[t], vs, ci_gluc[t], cs_gluc, goldman_param)
     # Updating flux equations with electodiffusive fluxes (transporters).
     # Electodiffusive fluxes  are proportional to the differences in electrochemical driving forces
-
-    Transporters_progressive_activation_along_time = 0
+    T_window = 24
+    Transporters_progressive_activation_alongtime = 1
     sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
     kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
-    Transp_Progres_Activ(Transporters_progressive_activation_along_time, t, Nfac)
+        Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
+    print('Transp_Progres_Activ',Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t,  T, T_window))
 
     # Net electodiffusive fluxes on the mi border
     # see label {eq: NAGLUC}
@@ -993,6 +1174,7 @@ def eQs(guess, solver):
     qe_urea = phi_scale(qe_urea, scale)
     qe_nh3 = phi_scale(qe_nh3, scale)
     qe_nh4 = phi_scale(qe_nh4, scale)
+    print('qe_hpo4',  qe_hpo4)
     qe_h = phi_scale(qe_h, scale)
     qe_hco2 = phi_scale(qe_hco2, scale)
     qe_h2co2 = phi_scale(qe_h2co2, scale)
@@ -1039,214 +1221,145 @@ def eQs(guess, solver):
         phii_cl = qi_cl
         phi[20] = phii_cl
         phii_urea = qi_urea
+
         phi[26] = phii_urea
         phii_gluc = qi_gluc
         phi[31] = phii_gluc
-        buffer_effect_activate_over_time_one_by_one = 0
-        buffer_effect_activate_alltogether = 1
-        if t > int(8000*Nfac) and buffer_effect_activate_alltogether:
-            # LIS: the error term for bicarbonate generation is replaced by conservation
-            # of charge in the buffer reactions.
-            # see label {conser_charge_buf}
-            qe_hco3 = + qe_h + qe_nh4 - qe_hco3 + qe_h2co2 + qe_h2po4
-            phi [ 5 ] = qe_hco3
-            # LIS: hydration and dhydration of co2
-            # see label {co2_hyd_dhyd}
-            qe_co2 = qe_co2 + scale * chvl [ t ] * (khy_4 * ce_co2 [ t ] - kdhy_4 * ce_h2co3 [ t ])
-            phi [ 7 ] = qe_co2
-            # LIS: see label {conser_charge_co2}
-            qe_h2co3 = qe_hco3 + qe_h2co3 + qe_co2
-            phi [ 6 ] = qe_h2co3
-            # cell: see label {conser_charge_buf}
-            qi_hco3 = + qi_h + qi_nh4 - qi_hco3 + qi_h2co2 + qi_h2po4
-            phi [ 21 ] = qi_hco3
-            # cell: hydration and dhydration of co2
-            # see label {co2_hyd_dhyd}
-            qi_co2 = qi_co2 + scale * clvl [ t ] * (khy * ci_co2 [ t ] - kdhy * ci_h2co3 [ t ])
-            phi [ 23 ] = qi_co2
-            # cell: see label {conser_charge_co2}
-            qi_h2co3 = qi_hco3 + qi_h2co3 + qi_co2
-            phi [ 22 ] = qi_h2co3
+        Buffers_off = 1
+        # if Buffers_off == 0:
+        #     phi [ 5 ] = qe_hco3
+        #     phi [ 6 ] = qe_h2co3
+        #     phi [ 7 ] = qe_co2
+        #     phi [ 21 ] = qi_hco3
+        #     phi [ 23 ] = qi_co2
+        #     phi [ 22 ] = qi_h2co3
+        #     phi [ 11 ] = qe_nh3
+        #     phi [ 12 ] = qe_nh4
+        #     phi [ 27 ] = qi_nh3
+        #     phi [ 28 ] = qi_nh4
+        #     phi [ 13 ] = qe_hco2
+        #     phi [ 14 ] = qe_h2co2
+        #     phi [ 29 ] = qi_hco2
+        #     phi [ 30 ] = qi_h2co2
+        #     phi [ 8 ] = qe_hpo4
+        #     phi[9] = qe_h2po4
+        #     phi[24] = qi_hpo4
+        #     phi[25] = qi_h2po4
+
+        phi [ 5 ] = qe_hco3
+        phi [ 6 ] = qe_h2co3
+        phi [ 7 ] = qe_co2
+        phi [ 21 ] = qi_hco3
+        phi [ 23 ] = qi_co2
+        phi [ 22 ] = qi_h2co3
+        phi [ 11 ] = qe_nh3
+        phi [ 12 ] = qe_nh4
+        phi [ 27 ] = qi_nh3
+        phi [ 28 ] = qi_nh4
+        phi [ 13 ] = qe_hco2
+        phi [ 14 ] = qe_h2co2
+        phi [ 29 ] = qi_hco2
+        phi [ 30 ] = qi_h2co2
+        phi [ 8 ] = qe_hpo4
+        phi [ 9 ] = qe_h2po4
+        phi [ 24 ] = qi_hpo4
+        phi [ 25 ] = qi_h2po4
+        BuffPairs_progressive_activation_alongtime = 1
+        print('buffer', BuffPairs_Progres_Activ(BuffPairs_progressive_activation_alongtime, t,  T, T_window))
+        Buffer_Co2_LIS_Param, Buffer_Co2_Cell_Param, dihydrogen_phosphate_param_e, Buffer_HPO4_LIS_Param,\
+        dihydrogen_phosphate_param_i, Buffer_HPO4_CELL_Param, dihydrogen_ammonium_param_e, Buffer_NH3_LIS_Param, \
+        dihydrogen_ammonium_param_i, Buffer_NH3_CELL_Param, dihydroxymethylidene_param_e, Buffer_HCO2_LIS_Param, \
+        dihydroxymethylidene_param_i, Buffer_HCO2_CELL_Param = BuffPairs_Progres_Activ(BuffPairs_progressive_activation_alongtime, t, T, T_window)
+
+        # co2, formate, phosphate, and ammonia content:
+        print('qe_h',qe_h)
+        qe_hco3, qe_h2co3, qe_co2 = Buff_Activ_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
+                                                                                   qe_h2po4, qe_co2, qe_h2co3,
+                                                                                   ce_co2 [ t ],
+                                                                                   ce_h2co3 [ t ], chvl [ t ], scale,
+                                                                                   Buffer_Co2_LIS_Param)
+        phi [ 5 ] = qe_hco3
+        phi [ 6 ] = qe_h2co3
+        phi [ 7 ] = qe_co2
+        # phi [ 5 ] = qe_hco3
+        # phi [ 6 ] = qe_h2co3
+        # phi [ 7 ] = qe_co2
+        # phi [ 21 ] = qi_hco3
+        # phi [ 23 ] = qi_co2
+        # phi [ 22 ] = qi_h2co3
+        # phi [ 11 ] = qe_nh3
+        # phi [ 12 ] = qe_nh4
+        # phi [ 27 ] = qi_nh3
+        # phi [ 28 ] = qi_nh4
+        # phi [ 13 ] = qe_hco2
+        # phi [ 14 ] = qe_h2co2
+        # phi [ 29 ] = qi_hco2
+        # phi [ 30 ] = qi_h2co2
+        # phi [ 8 ] = qe_hpo4
+        # phi [ 9 ] = qe_h2po4
+        # phi [ 24 ] = qi_hpo4
+        # phi [ 25 ] = qi_h2po4
+        print('phi [5 ], phi [ 6 ]', phi [5 ], phi [ 6 ])
+        phi [ 21 ], phi [ 22 ], phi [23 ] = Buff_Activ_co2_formate_phosphate_ammonia(qi_h, qi_nh4, qi_hco3, qi_h2co2,
+                                                                                   qi_h2po4, qi_co2, qi_h2co3,
+                                                                                   ci_co2 [ t ],
+                                                                                   ci_h2co3 [ t ], clvl [ t ], scale,
+                                                                                   Buffer_Co2_Cell_Param)
+                # LIS & CELL: see label {phosphate}
+        # LIS & CELL: see labela {pH_equilibria}, used as paired equations
+
+        phi [ 8 ], phi [ 9 ] = Buff_Activ(qe_hpo4,qe_h2po4, lche, pkp, ce_hpo4 [ t ], ce_h2po4 [ t ], dihydrogen_phosphate_param_e, Buffer_HPO4_LIS_Param)
+        print('phi [ 8 ], phi [ 9 ]',phi [ 8 ], phi [ 9 ])
+
+        phi [ 24 ], phi [ 25 ] = Buff_Activ(qi_hpo4, qi_h2po4, lchi, pkp, ci_hpo4 [ t ], ci_h2po4 [ t ],
+                                          dihydrogen_phosphate_param_i, Buffer_HPO4_CELL_Param)
+
+        # LIS & CELL: see label {ammonia}
+        # LIS & CELL: see labela {pH_equilibria}, used as paired equations
+        phi [ 11 ], phi [ 12 ] = Buff_Activ(qe_nh3, qe_nh4, lche, pkn, ce_nh3 [ t ], ce_nh4 [ t ],
+                                          dihydrogen_ammonium_param_e, Buffer_NH3_LIS_Param)
+
+        phi [ 27 ], phi [ 28 ] = Buff_Activ(qi_nh3, qi_nh4, lchi, pkn, ci_nh3 [ t ], ci_nh4 [ t ],
+                                          dihydrogen_ammonium_param_i, Buffer_NH3_CELL_Param)
+
+        # LIS & CELL: see label {formate}
+        # LIS & CELL: see labela {pH_equilibria}, used as paired equations
+        phi [ 13 ], phi [ 14 ] = Buff_Activ(qe_hco2, qe_h2co2, lche, pkf, ce_hco2 [ t ], ce_h2co2 [ t ],
+                                          dihydroxymethylidene_param_e, Buffer_HCO2_LIS_Param)
+
+        phi [ 29 ], phi [30 ] = Buff_Activ(qi_hco2, qi_h2co2, lchi, pkn, ci_hco2 [ t ], ci_h2co2 [ t ],
+                                            dihydroxymethylidene_param_i, Buffer_HCO2_CELL_Param)
 
 
-            # LIS: see label {phosphate}
-            qe_hpo4 = qe_hpo4 + qe_h2po4
-            phi [ 8 ] = qe_hpo4
-            # LIS: see labela {pH_equilibria}, used as paired equations
-            dihydrogen_phosphate_param_e = 1
-            qe_h2po4 = ebuf(lche, pkp, ce_hpo4 [ t ], ce_h2po4 [ t ], dihydrogen_phosphate_param_e)
-            phi [ 9 ] = qe_h2po4
-            # cell: see label {phosphate}
-            qi_hpo4 = qi_hpo4 + qi_h2po4
-            phi [ 24 ] = qi_hpo4
-            # cell: see labela {pH_equilibria}, used as paired equations
-            dihydrogen_phosphate_param_i = 1
-            qi_h2po4 = ebuf(lchi, pkp, ci_hpo4 [ t ], ci_h2po4 [ t ], dihydrogen_phosphate_param_i)
-            phi [ 25 ] = qi_h2po4
+        # cell buffer content and ph equilibrium
+        # cell: see label {tbuf_volume}
+        qi_cb = cbuf[t] + hcbuf[t] - (tbuf * clvl0 / clvl[t])
+        phi[32] = qi_cb
+        # cell: see label {ph_H2PO4_Hbuf}
+        c_eQ_h2po4 = math.log10(abs(
+            (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))) if ci_h2po4[t] * cbuf[t] == 0 or (
+                (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]) <= 0) else math.log10(
+            (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))
+        phi_ph_eQ = pkb - pkp - c_eQ_h2po4
+        phi[33] = phi_ph_eQ
 
-            # LIS: see label {ammonia}
-            qe_nh3 = qe_nh3 + qe_nh4
-            phi [ 11 ] = qe_nh3
-            # LIS: see labela {pH_equilibria}, used as paired equations
-            ammonium_param_e = 1
-            qe_nh4 = ebuf(lche, pkn, ce_nh3 [ t ], ce_nh4 [ t ], ammonium_param_e)
-            phi [ 12 ] = qe_nh4
-            # cell: see label {ammonia_Q}
-            qi_nh3 = qi_nh3 + qi_nh4 - scale * qiamm
-            phi [ 27 ] = qi_nh3
-            # cell: see labela {pH_equilibria}, used as paired equations for {ammonia_Q}
-            ammonium_param_i = 1
-            qi_nh4 = ebuf(lchi, pkn, ci_nh3 [ t ], ci_nh4 [ t ], ammonium_param_i)
-            phi [ 28 ] = qi_nh4
+        # cell buffer content and ph equilibrium
+        # see label {electrical_Iin}
+        cure = f * (
+                z_na * fekm_na + z_k * fekm_k + z_cl * fekm_cl + z_hco3 * fekm_hco3 + z_h2co3 * fekm_h2co3 + z_co2
+                * fekm_co2 + z_hpo4 * fekm_hpo4 + z_h2po4 * fekm_h2po4 + z_urea * fekm_urea + z_nh3 * fekm_nh3 + z_nh4
+                * fekm_nh4 + z_h * fekm_h + z_hco2 * fekm_hco2 + z_h2co2 * fekm_h2co2 + z_gluc *
+                fekm_gluc)
 
-            # LIS: see label {formate}
-            qe_hco2 = qe_hco2 + qe_h2co2
-            phi [ 13 ] = qe_hco2
-            # LIS: see labela {pH_equilibria}, used as paired equations for {formate}
-            dihydroxymethylidene_param_e = 1
-            qe_h2co2 = ebuf(lche, pkf, ce_hco2 [ t ], ce_h2co2 [ t ], dihydroxymethylidene_param_e)
-            phi [ 14 ] = qe_h2co2
-            # cell: see label {formate}
-            qi_hco2 = qi_hco2 + qi_h2co2
-            phi [ 29 ] = qi_hco2
-            # LIS: see labela {pH_equilibria}, used as paired equations for {formate}
-            dihydroxymethylidene_param_i = 1
-            qi_h2co2 = ebuf(lchi, pkf, ci_hco2 [ t ], ci_h2co2 [ t ], dihydroxymethylidene_param_i)
-            phi [ 30 ] = qi_h2co2
+        curi = f * (
+                z_na * fikm_na + z_k * fikm_k + z_cl * fikm_cl + z_hco3 * fikm_hco3 + z_h2co3 * fikm_h2co3 + z_co2
+                * fikm_co2 + z_hpo4 * fikm_hpo4 + z_h2po4 * fikm_h2po4 + z_urea * fikm_urea + z_nh3 * fikm_nh3 + z_nh4 *
+                fikm_nh4 + z_h * fikm_h + z_hco2 * fikm_hco2 + z_h2co2 * fikm_h2co2 + z_gluc *
+                fikm_gluc)
+        phie_cur = cure + curi
+        phi[34] = phie_cur
 
-        else:
-
-            # co2, formate, phosphate, and ammonia content:
-            if int(4000*Nfac) < t and buffer_effect_activate_over_time_one_by_one:
-                print('buffer_effect_activate_over_time_for_co2, formate, phosphate, and ammonia', 't=', str(t))
-                print(int(4000*Nfac) < t)
-                qe_hco3 = + qe_h + qe_nh4 - qe_hco3 + qe_h2co2 + qe_h2po4
-                phi [ 5 ] = qe_hco3
-                # LIS: hydration and dhydration of co2
-                # see label {co2_hyd_dhyd}
-                qe_co2 = qe_co2 + scale * chvl [ t ] * (khy * ce_co2 [ t ] - kdhy * ce_h2co3 [ t ])
-                phi [ 7 ] = qe_co2
-                # LIS: see label {conser_charge_co2}
-                qe_h2co3 = qe_hco3 + qe_h2co3 + qe_co2
-                phi [ 6 ] = qe_h2co3
-                # cell: see label {conser_charge_buf}
-                qi_hco3 = - qi_hco3 + qi_h2po4 + qi_nh4 + qi_h + qi_h2co2
-                phi [ 21 ] = qi_hco3
-                # cell: hydration and dhydration of co2
-                # see label {co2_hyd_dhyd}
-                qi_co2 = qi_co2 + scale * clvl [ t ] * (khy * ci_co2 [ t ] - kdhy * ci_h2co3 [ t ])
-                phi [ 23 ] = qi_co2
-                # cell: see label {conser_charge_co2}
-                qi_h2co3 = qi_hco3 + qi_h2co3 + qi_co2
-                phi [ 22 ] = qi_h2co3
-            else:
-                #print('test')
-                print('No_buffer_effect_co2, formate, phosphate, and ammonia', 't=', str(t))
-                phi[5] = qe_hco3
-                phi[7] = qe_co2
-                phi[6] = qe_h2co3
-                phi[21] = qi_hco3
-                phi[23] = qi_co2
-                phi[22] = qi_h2co3
-
-            if int(4400*Nfac) < t and buffer_effect_activate_over_time_one_by_one:
-                print('buffer_effect_activate_over_time_for_phosphate', 't=', str(t))
-                #print('test')
-                # LIS: see label {phosphate}
-                qe_hpo4 = qe_hpo4 + qe_h2po4
-                phi[8] = qe_hpo4
-                # LIS: see labela {pH_equilibria}, used as paired equations
-                dihydrogen_phosphate_param_e = 1
-                qe_h2po4 = ebuf(lche, pkp, ce_hpo4[t], ce_h2po4[t], dihydrogen_phosphate_param_e)
-                phi[9] = qe_h2po4
-                # cell: see label {phosphate}
-                qi_hpo4 = qi_hpo4 + qi_h2po4
-                phi[24] = qi_hpo4
-                # cell: see labela {pH_equilibria}, used as paired equations
-                dihydrogen_phosphate_param_i = 1
-                qi_h2po4 = ebuf(lchi, pkp, ci_hpo4[t], ci_h2po4[t], dihydrogen_phosphate_param_i)
-                phi[25] = qi_h2po4
-
-            else:
-                print('No_buffer_effect_phosphate', 't=', str(t))
-                phi[8] = qe_hpo4
-                phi[9] = qe_h2po4
-                phi[24] = qi_hpo4
-                phi[25] = qi_h2po4
-            if int(4800*Nfac) < t and buffer_effect_activate_over_time_one_by_one :
-                print('buffer_effect_activate_over_time_for_ammonia', 't=', str(t))
-                # LIS: see label {ammonia}
-                qe_nh3 = qe_nh3 + qe_nh4
-                phi[11] = qe_nh3
-                # LIS: see labela {pH_equilibria}, used as paired equations
-                ammonium_param_e = 1
-                qe_nh4 = ebuf(lche, pkn, ce_nh3[t], ce_nh4[t], ammonium_param_e)
-                phi[12] = qe_nh4
-                # cell: see label {ammonia_Q}
-                qi_nh3 = qi_nh3 + qi_nh4 - scale * qiamm
-                phi[27] = qi_nh3
-                # cell: see labela {pH_equilibria}, used as paired equations for {ammonia_Q}
-                ammonium_param_i = 1
-                qi_nh4 = ebuf(lchi, pkn, ci_nh3[t], ci_nh4[t], ammonium_param_i)
-                phi[28] = qi_nh4
-            else:
-                print('No_buffer_effect_ammonia', 't=', str(t))
-                phi[11] = qe_nh3
-                phi[12] = qe_nh4
-                phi[27] = qi_nh3
-                phi[28] = qi_nh4
-
-            if int(5200*Nfac) < t and buffer_effect_activate_over_time_one_by_one:
-                print('buffer_effect_activate_over_time_for_formate', 't=', str(t))
-                # LIS: see label {formate}
-                qe_hco2 = qe_hco2 + qe_h2co2
-                phi[13] = qe_hco2
-                # LIS: see labela {pH_equilibria}, used as paired equations for {formate}
-                dihydroxymethylidene_param_e = 1
-                qe_h2co2 = ebuf(lche, pkf, ce_hco2[t], ce_h2co2[t], dihydroxymethylidene_param_e)
-                phi[14] = qe_h2co2
-                # cell: see label {formate}
-                qi_hco2 = qi_hco2 + qi_h2co2
-                phi[29] = qi_hco2
-                # LIS: see labela {pH_equilibria}, used as paired equations for {formate}
-                dihydroxymethylidene_param_i = 1
-                qi_h2co2 = ebuf(lchi, pkf, ci_hco2[t], ci_h2co2[t], dihydroxymethylidene_param_i)
-                phi[30] = qi_h2co2
-            else:
-                phi[13] = qe_hco2
-                phi[14] = qe_h2co2
-                phi[29] = qi_hco2
-                phi[30] = qi_h2co2
-
-    # cell buffer content and ph equilibrium
-    # cell: see label {tbuf_volume}
-    qi_cb = cbuf[t] + hcbuf[t] - (tbuf * clvl0 / clvl[t])
-    phi[32] = qi_cb
-    # cell: see label {ph_H2PO4_Hbuf}
-    c_eQ_h2po4 = math.log10(abs(
-        (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))) if ci_h2po4[t] * cbuf[t] == 0 or (
-            (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]) <= 0) else math.log10(
-        (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))
-    phi_ph_eQ = pkb - pkp - c_eQ_h2po4
-    phi[33] = phi_ph_eQ
-
-    # cell buffer content and ph equilibrium
-    # see label {electrical_Iin}
-    cure = f * (
-            z_na * fekm_na + z_k * fekm_k + z_cl * fekm_cl + z_hco3 * fekm_hco3 + z_h2co3 * fekm_h2co3 + z_co2
-            * fekm_co2 + z_hpo4 * fekm_hpo4 + z_h2po4 * fekm_h2po4 + z_urea * fekm_urea + z_nh3 * fekm_nh3 + z_nh4
-            * fekm_nh4 + z_h * fekm_h + z_hco2 * fekm_hco2 + z_h2co2 * fekm_h2co2 + z_gluc *
-            fekm_gluc)
-
-    curi = f * (
-            z_na * fikm_na + z_k * fikm_k + z_cl * fikm_cl + z_hco3 * fikm_hco3 + z_h2co3 * fikm_h2co3 + z_co2
-            * fikm_co2 + z_hpo4 * fikm_hpo4 + z_h2po4 * fikm_h2po4 + z_urea * fikm_urea + z_nh3 * fikm_nh3 + z_nh4 *
-            fikm_nh4 + z_h * fikm_h + z_hco2 * fikm_hco2 + z_h2co2 * fikm_h2co2 + z_gluc *
-            fikm_gluc)
-    phie_cur = cure + curi
-    phi[34] = phie_cur
-
-    return phi
+        return phi
 
 
 # # sol(1)='  na '
@@ -1264,10 +1377,10 @@ def eQs(guess, solver):
 # # sol(13)=' hco2'
 # # sol(14)='h2co2'
 # # sol(15)=' gluc'
-Nfac = 1
+Nfac = 10
 t0 = 0
-tf = 5600
-T = int(56000*Nfac)
+tf = 200
+T = int(tf * Nfac)
 dt = float(tf - t0) / float(T)
 print('dt', dt)
 # print('scale',scale)
