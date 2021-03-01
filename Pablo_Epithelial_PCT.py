@@ -252,6 +252,141 @@ def phi_scale(phi, scale):
 
 
 solver = 1
+def Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window):
+    if Transporters_progressive_activation_alongtime == 1:
+        sglt_mi_param = 0
+        nah2po4_mi_param = 0
+        clhco3_mi_param = 0
+        clhco2_mi_param = 0
+        nahco3_is_param = 0
+        nahco3_ie_param = 0
+        kcl_is_param = 0
+        kcl_ie_param = 0
+        na_clhco3_is_param = 0
+        na_clhco3_ie_param = 0
+        nah_param = 0
+        nak_atp_param = 0
+        h_mi_atp_param = 0
+        Time_Durtn = int(T / T_window)
+        n = 0 #int(2 * Time_Durtn)
+        if Time_Durtn < t < n + Time_Durtn:
+            print('No Transporter Yet at Time_Durtn' if t == Time_Durtn else '')
+        elif n + Time_Durtn <= t < n + 2 * Time_Durtn :
+            sglt_mi_param = 1
+            print('sglt_mi_param_activation at time =' + str(Time_Durtn) if t == n + 2 * Time_Durtn else '')
+        elif n + 2 * Time_Durtn <= t< n + 3* Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+        elif n + 3 * Time_Durtn <= t < n + 4 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+        elif n +4 * Time_Durtn <= t < n + 5 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+        elif n + 5 * Time_Durtn <= t< n + 6 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+        elif n + 6 * Time_Durtn <= t< n + 7 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+        elif n + 7 * Time_Durtn <= t < n + 8 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+        elif n + 8 * Time_Durtn <= t < n + 9 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+        elif n + 9 * Time_Durtn <= t < n + 10 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+            nak_atp_param = 1
+        else:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+            nak_atp_param = 1
+            h_mi_atp_param = 1
+        # return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+        #        kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
+    else:
+        if t >= int(T/4):
+            print(
+                'Transporters added to the system at time=' + str(t) if t == int(T / 4) else '')
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+            nak_atp_param = 1
+            h_mi_atp_param = 1
+        else:
+            sglt_mi_param = 0
+            nah2po4_mi_param = 0
+            clhco3_mi_param = 0
+            clhco2_mi_param = 0
+            nahco3_is_param = 0
+            nahco3_ie_param = 0
+            kcl_is_param = 0
+            kcl_ie_param = 0
+            na_clhco3_is_param = 0
+            na_clhco3_ie_param = 0
+            nah_param = 0
+            nak_atp_param = 0
+            h_mi_atp_param = 0
+    return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+    kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
 
 
 def eQs(guess, solver):
@@ -570,137 +705,14 @@ def eQs(guess, solver):
     # Updating flux equations with electodiffusive fluxes (transporters).
     # electodiffusive fluxes  are proportional to the differences
     # in electrochemical driving forces
-    if 0 < t <= 4000:
-        sglt_mi_param = 0
-        nah2po4_mi_param = 0
-        clhco3_mi_param = 0
-        clhco2_mi_param = 0
-        nahco3_is_param = 0
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 4000 < t <= 8000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 0
-        clhco3_mi_param = 0
-        clhco2_mi_param = 0
-        nahco3_is_param = 0
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 8000 < t <= 12000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 0
-        clhco2_mi_param = 0
-        nahco3_is_param = 0
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 12000 < t <= 16000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 0
-        nahco3_is_param = 0
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 16000 < t <= 20000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 0
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 20000 < t <= 24000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 0
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 24000 < t <= 28000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 1
-        na_clhco3_is_param = 0
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 28000 < t <= 32000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 1
-        na_clhco3_is_param = 1
-        nah_param = 0
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 32000 < t <= 36000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 1
-        na_clhco3_is_param = 1
-        nah_param = 1
-        nak_atp_param = 0
-        at_mi_h_param = 0
-
-    elif 36000 < t <= 40000:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 1
-        na_clhco3_is_param = 1
-        nah_param = 1
-        nak_atp_param = 1
-        at_mi_h_param = 0
-
-    else:
-        sglt_mi_param = 1
-        nah2po4_mi_param = 1
-        clhco3_mi_param = 1
-        clhco2_mi_param = 1
-        nahco3_is_param = 1
-        kcl_is_param = 1
-        na_clhco3_is_param = 1
-        nah_param = 1
-        nak_atp_param = 1
-        at_mi_h_param = 1
+    # Updating flux equations with electodiffusive fluxes (transporters).
+    # Electodiffusive fluxes  are proportional to the differences in electrochemical driving forces
+    T_window = 15
+    Transporters_progressive_activation_alongtime = 1
+    sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+    kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
+        Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
+    print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
 
     # net transporters on mi bourder
     sglt = sglt_mi(cm_na, ci_na[t], cm_gluc, ci_gluc[t], z_na, z_gluc, vm[t], vi[t], ami, lmi_nagluc,
@@ -790,7 +802,7 @@ def eQs(guess, solver):
     atis_k = nak[1]
     atis_nh4 = nak[2]
     # proton pumps
-    atmi_h = at_mi_h(cm_h, ci_h[t], vm[t], vi[t], z_h, ami, at_mi_h_param )
+    atmi_h = at_mi_h(cm_h, ci_h[t], vm[t], vi[t], z_h, ami,  h_mi_atp_param)
 
     jk_na = jk_na + aie * atis_na
     jk_k = jk_k + aie * atis_k
@@ -943,8 +955,9 @@ def eQs(guess, solver):
         phi[31] = phii_gluc
 
         # co2, formate, phosphate, and ammonia content:
-
-        if 40000 < t:
+        Time_Durtn = int(T / T_window)
+        n = int(2 * Time_Durtn)
+        if n + 10 * Time_Durtn < t :
             # the error term for bicarbonate generation is replaced by conservation
             # of charge in the buffer reactions.
             qe_hco3 = - qe_hco3 + qe_h2po4 + qe_nh4 + qe_h + qe_h2co2
@@ -969,7 +982,7 @@ def eQs(guess, solver):
             phi[21] = qi_hco3
             phi[22] = qi_h2co3
             phi[23] = qi_co2
-        if 44000 < t:
+        if n + 11 * Time_Durtn < t :
             qe_hpo4 = qe_hpo4 + qe_h2po4
             phi[8] = qe_hpo4
 
@@ -989,7 +1002,7 @@ def eQs(guess, solver):
             phi[9] = qe_h2po4
             phi[24] = qi_hpo4
             phi[25] = qi_h2po4
-        if 48000 < t:
+        if n + 12 * Time_Durtn < t :
             qe_nh3 = qe_nh3 + qe_nh4
             phi[11] = qe_nh3
             ammonium_param_e = 1
@@ -1007,7 +1020,7 @@ def eQs(guess, solver):
             phi[27] = qi_nh3
             phi[28] = qi_nh4
 
-        if 52000 < t:
+        if n + 13 * Time_Durtn < t :
             qe_hco2 = qe_hco2 + qe_h2co2
             phi[13] = qe_hco2
             dihydroxymethylidene_param_e = 1
@@ -1068,10 +1081,12 @@ def eQs(guess, solver):
 # # sol(13)=' hco2'
 # # sol(14)='h2co2'
 # # sol(15)=' gluc'
+Nfac = 10
 t0 = 0
-tf = 5600
-T = 56000
-dt = (tf - t0) / (T - 1)
+tf = 1000
+T = int(tf * Nfac)
+dt = float(tf - t0) / float(T)
+print('dt', dt)
 rtau = 1/dt
 ve = matrix(-0.89432938258185330771e-02, T)
 pe = matrix(-0.23093764341580683919e+02, T)
