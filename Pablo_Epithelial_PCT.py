@@ -910,9 +910,9 @@ def eQs(guess, solver):
     qi_nh3 =phi_scale(qi_nh3, scale)
     qi_nh4 =phi_scale(qi_nh4, scale)
     qi_h =phi_scale(qi_h, scale)
-    qi_hco2 =phi_scale(qi_hco2, scale)
-    qi_h2co2 =phi_scale(qi_h2co2, scale)
-    qi_gluc =phi_scale(qi_gluc, scale)
+    qi_hco2 = phi_scale(qi_hco2, scale)
+    qi_h2co2 = phi_scale(qi_h2co2, scale)
+    qi_gluc = phi_scale(qi_gluc, scale)
 
     # now set the phis in terms of the solute generation rates
     # first the non-reactive species
@@ -947,28 +947,28 @@ def eQs(guess, solver):
         if 40000 < t:
             # the error term for bicarbonate generation is replaced by conservation
             # of charge in the buffer reactions.
-            qe_h2co3 = - qe_hco3 + qe_h2po4 + qe_nh4 + qe_h + qe_h2co2
-            phi[5] = qe_h2co3
+            qe_hco3 = - qe_hco3 + qe_h2po4 + qe_nh4 + qe_h + qe_h2co2
+            phi[5] = qe_hco3
             # hydration and dhydration of co2
-            qe_co2 = qe_co2 + 1.e6 * chvl[t] * (khy_4 * ce_co2[t] - kdhy_4 * ce_h2co3[t])
-            phi[6] = qe_co2
-            qe_hco3 = qe_hco3 + qe_h2co3 + qe_co2
-            phi[7] = qe_hco3
+            qe_h2co3 = qe_co2 + 1.e6 * chvl[t] * (khy_4 * ce_co2[t] - kdhy_4 * ce_h2co3[t])
+            phi[6] = qe_h2co3
+            qe_co2 = qe_hco3 + qe_h2co3 + qe_co2
+            phi[7] = qe_co2
 
-            qi_h2co3 = - qi_hco3 + qi_h2po4 + qi_nh4 + qi_h + qi_h2co2
-            phi[21] = qi_h2co3
-            qi_co2 = qi_co2 + 1.e6 * clvl[t] * (khy * ci_co2[t] - kdhy * ci_h2co3[t])
-            phi[22] = qi_co2
-            qi_hco3 = qi_hco3 + qi_h2co3 + qi_co2
-            phi[23] = qi_hco3
+            qi_hco3 = - qi_hco3 + qi_h2po4 + qi_nh4 + qi_h + qi_h2co2
+            phi[21] = qi_hco3
+            qi_h2co3 = qi_co2 + 1.e6 * clvl[t] * (khy * ci_co2[t] - kdhy * ci_h2co3[t])
+            phi[22] = qi_h2co3
+            qi_co2 = qi_hco3 + qi_h2co3 + qi_co2
+            phi[23] = qi_co2
         else:
 
-            phi[5] = qe_h2co3
-            phi[6] = qe_co2
-            phi[7] = qe_hco3
-            phi[21] = qi_h2co3
-            phi[22] = qi_co2
-            phi[23] = qi_hco3
+            phi[5] = qe_hco3
+            phi[6] = qe_h2co3
+            phi[7] = qe_co2
+            phi[21] = qi_hco3
+            phi[22] = qi_h2co3
+            phi[23] = qi_co2
         if 44000 < t:
             qe_hpo4 = qe_hpo4 + qe_h2po4
             phi[8] = qe_hpo4
@@ -989,41 +989,41 @@ def eQs(guess, solver):
             phi[9] = qe_h2po4
             phi[24] = qi_hpo4
             phi[25] = qi_h2po4
-    if 48000 < t:
-        qe_nh3 = qe_nh3 + qe_nh4
-        phi[11] = qe_nh3
-        ammonium_param_e = 1
-        qe_nh4 = ebuf(lche, pkn, ce_nh3[t], ce_nh4[t], ammonium_param_e)
-        phi[12] = qe_nh4
-        qi_nh3 = qi_nh3 + qi_nh4 - 1e6 * qiamm
-        phi[27] = qi_nh3
-        ammonium_param_i = 1
-        qi_nh4 = ebuf(lchi, pkn, ci_nh3[t], ci_nh4[t], ammonium_param_i)
-        phi[28] = qi_nh4
-    else:
+        if 48000 < t:
+            qe_nh3 = qe_nh3 + qe_nh4
+            phi[11] = qe_nh3
+            ammonium_param_e = 1
+            qe_nh4 = ebuf(lche, pkn, ce_nh3[t], ce_nh4[t], ammonium_param_e)
+            phi[12] = qe_nh4
+            qi_nh3 = qi_nh3 + qi_nh4 - 1e6 * qiamm
+            phi[27] = qi_nh3
+            ammonium_param_i = 1
+            qi_nh4 = ebuf(lchi, pkn, ci_nh3[t], ci_nh4[t], ammonium_param_i)
+            phi[28] = qi_nh4
+        else:
 
-        phi[11] = qe_nh3
-        phi[12] = qe_nh4
-        phi[27] = qi_nh3
-        phi[28] = qi_nh4
+            phi[11] = qe_nh3
+            phi[12] = qe_nh4
+            phi[27] = qi_nh3
+            phi[28] = qi_nh4
 
-    if 52000 < t:
-        qe_hco2 = qe_hco2 + qe_h2co2
-        phi[13] = qe_hco2
-        dihydroxymethylidene_param_e = 1
-        qe_h2co2 = ebuf(lche, pkf, ce_hco2[t], ce_h2co2[t], dihydroxymethylidene_param_e)
-        phi[14] = qe_h2co2
-        qi_hco2 = qi_hco2 + qi_h2co2
-        phi[29] = qi_hco2
-        dihydroxymethylidene_param_i = 1
-        qi_h2co2 = ebuf(lchi, pkf, ci_hco2[t], ci_h2co2[t], dihydroxymethylidene_param_i)
-        phi[30] = qi_h2co2
+        if 52000 < t:
+            qe_hco2 = qe_hco2 + qe_h2co2
+            phi[13] = qe_hco2
+            dihydroxymethylidene_param_e = 1
+            qe_h2co2 = ebuf(lche, pkf, ce_hco2[t], ce_h2co2[t], dihydroxymethylidene_param_e)
+            phi[14] = qe_h2co2
+            qi_hco2 = qi_hco2 + qi_h2co2
+            phi[29] = qi_hco2
+            dihydroxymethylidene_param_i = 1
+            qi_h2co2 = ebuf(lchi, pkf, ci_hco2[t], ci_h2co2[t], dihydroxymethylidene_param_i)
+            phi[30] = qi_h2co2
 
-    else:
-        phi[13] = qe_hco2
-        phi[14] = qe_h2co2
-        phi[29] = qi_hco2
-        phi[30] = qi_h2co2
+        else:
+            phi[13] = qe_hco2
+            phi[14] = qe_h2co2
+            phi[29] = qi_hco2
+            phi[30] = qi_h2co2
 
         # cell buffer content and ph equilibrium
     qi_cb = cbuf[t] + hcbuf[t] - (tbuf * clvl0 / clvl[t])
