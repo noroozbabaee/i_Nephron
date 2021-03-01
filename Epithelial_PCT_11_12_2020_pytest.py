@@ -303,9 +303,9 @@ def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po
 
         # LIS: hydration and dhydration of co2
         # see label {co2_hyd_dhyd}
-        q_co2 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
+        q_h2co3 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
         # LIS: see label {conser_charge_co2}
-        q_h2co3 = q_hco3 + q_h2co3 + q_co2
+        q_co2  = q_hco3 + q_h2co3 + q_co2
     #    print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
     else:
         # print('No Buffer Effect for co2, formate, phosphate, and ammonia')
@@ -314,13 +314,29 @@ def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po
     return q_hco3,  q_h2co3, q_co2
 
 
-def Buff_Activ(q_h_vary, q_h2_vary, lch, pk, c_h_vary, ebuf_Param, c_h2_vary, Buffer_Activation_Param):
+def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, ebuf_Param,  Buffer_Activation_Param):
     if Buffer_Activation_Param == 1:
         # print('buffer_effect_activate_over_time_for_phosphate', 't=', str(t))
+        # def lch(ca, cb):
+        #
+        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
+        #         return math.log10(ca / cb)
+        #     else:
+        #         return math.log10(abs(ca / cb))
+        #
+        # def ebuf(lc_h, pk, ca, cb, param_ebuf):
+        #     # pH equilibria of four buffer pairs
+        #     if param_ebuf == 0:
+        #         return 0
+        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
+        #         return lc_h - pk - math.log10(ca / cb)
+        #
+        #     else:
+        #         return lc_h - pk - math.log10(abs(ca / cb))
         # LIS: see label {phosphate}
         q_h_vary = q_h_vary + q_h2_vary
         # LIS: see labela {pH_equilibria}, used as paired equations
-        q_h2_vary = ebuf(lch, pk, c_h_vary, c_h2_vary, ebuf_Param)
+        q_h2_vary = ebuf(lc_h, pk, c_h_vary, c_h2_vary, ebuf_Param)
         print('Buffer Effect for phosphate')
     else:
         print('No Buffer Effect for phosphate')
@@ -1225,7 +1241,7 @@ def eQs(guess, solver):
         phi[26] = phii_urea
         phii_gluc = qi_gluc
         phi[31] = phii_gluc
-        Buffers_off = 1
+        Buffers_on = 1
         # if Buffers_off == 0:
         #     phi [ 5 ] = qe_hco3
         #     phi [ 6 ] = qe_h2co3
@@ -1273,20 +1289,13 @@ def eQs(guess, solver):
 
         # co2, formate, phosphate, and ammonia content:
         print('qe_h',qe_h)
-        qe_hco3, qe_h2co3, qe_co2 = Buff_Activ_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
+        phi [ 5 ] ,phi [ 6 ] , phi [ 7 ]= Buff_Activ_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
                                                                                    qe_h2po4, qe_co2, qe_h2co3,
                                                                                    ce_co2 [ t ],
                                                                                    ce_h2co3 [ t ], chvl [ t ], scale,
                                                                                    Buffer_Co2_LIS_Param)
-        phi [ 5 ] = qe_hco3
-        phi [ 6 ] = qe_h2co3
-        phi [ 7 ] = qe_co2
-        # phi [ 5 ] = qe_hco3
-        # phi [ 6 ] = qe_h2co3
-        # phi [ 7 ] = qe_co2
-        # phi [ 21 ] = qi_hco3
-        # phi [ 23 ] = qi_co2
-        # phi [ 22 ] = qi_h2co3
+
+
         # phi [ 11 ] = qe_nh3
         # phi [ 12 ] = qe_nh4
         # phi [ 27 ] = qi_nh3
@@ -1327,7 +1336,7 @@ def eQs(guess, solver):
         phi [ 13 ], phi [ 14 ] = Buff_Activ(qe_hco2, qe_h2co2, lche, pkf, ce_hco2 [ t ], ce_h2co2 [ t ],
                                           dihydroxymethylidene_param_e, Buffer_HCO2_LIS_Param)
 
-        phi [ 29 ], phi [30 ] = Buff_Activ(qi_hco2, qi_h2co2, lchi, pkn, ci_hco2 [ t ], ci_h2co2 [ t ],
+        phi [ 29 ], phi [30 ] = Buff_Activ(qi_hco2, qi_h2co2, lchi, pkf, ci_hco2 [ t ], ci_h2co2 [ t ],
                                             dihydroxymethylidene_param_i, Buffer_HCO2_CELL_Param)
 
 
@@ -1379,7 +1388,7 @@ def eQs(guess, solver):
 # # sol(15)=' gluc'
 Nfac = 10
 t0 = 0
-tf = 200
+tf = 1000
 T = int(tf * Nfac)
 dt = float(tf - t0) / float(T)
 print('dt', dt)
@@ -1586,12 +1595,12 @@ if plot_concen:
     ax [ 4 ].set_ylabel('voltage_i (mv) ', color='blue')
     ax [ 4 ].set_xlabel('time (s) ', color='blue')
     ax [ 4 ].set_xlim(-5, tf)
-    vis = np.asarray(vi) - np.asarray(vs)
-    v_is = np.asarray(vis)
-    ax [ 5 ].plot(t, v_is, 'b-', linewidth=2.0)
-    ax [ 5 ].set_ylabel('voltage_is (mv) ', color='blue')
-    ax [ 5 ].set_xlabel('time (s) ', color='blue')
-    ax [ 5 ].set_xlim(-5, tf)
+    vs = np.asarray(vs)
+
+    # ax [ 5 ].plot(t, vs, 'b-', linewidth=2.0)
+    # ax [ 5 ].set_ylabel('voltage_s (mv) ', color='blue')
+    # ax [ 5 ].set_xlabel('time (s) ', color='blue')
+    # ax [ 5 ].set_xlim(-5, tf)
     figE.savefig(pltfolder + '/figE' + tag + '.png')
     plt.show()
 
