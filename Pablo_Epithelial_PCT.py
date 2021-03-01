@@ -269,7 +269,7 @@ def Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_
         h_mi_atp_param = 0
         Time_Durtn = int(T / T_window)
         n = 0 #int(2 * Time_Durtn)
-        if Time_Durtn < t < n + Time_Durtn:
+        if n < t < n + Time_Durtn:
             print('No Transporter Yet at Time_Durtn' if t == Time_Durtn else '')
         elif n + Time_Durtn <= t < n + 2 * Time_Durtn :
             sglt_mi_param = 1
@@ -387,7 +387,62 @@ def Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_
             h_mi_atp_param = 0
     return sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
     kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param
+def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po4, q_co2, q_h2co3, c_co2, c_h2co3, volume, scale,flow_dependent, Co2_Progressive_Activation_Param):
+    if Co2_Progressive_Activation_Param == 1:
+        # print('Buffer activation at time =' + str(int(4000 * Nfac)))
+        # print('Buffer activation for co2, formate, phosphate, and ammonia', 't=', str(t))
+        # co2, formate, phosphate, and ammonia content:
+        # print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
+         if flow_dependent == 1:
+            q_hco3 = + q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4
+            q_h2co3 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
+            q_co2  = q_hco3 + q_h2co3 + q_co2
+         else:
+        # print('No Buffer Effect for co2, formate, phosphate, and ammonia')
+            q_hco3 = + q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4
 
+            # LIS: hydration and dhydration of co2
+            # see label {co2_hyd_dhyd}
+            q_h2co3 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
+            # LIS: see label {conser_charge_co2}
+            q_co2 = q_hco3 + q_h2co3 + q_co2
+    #print('q_hco3,  q_h2co3, q_co2', str(q_hco3),  str(q_h2co3), str(q_co2))
+    return q_hco3,  q_h2co3, q_co2
+
+
+def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_cell, ebuf_Param,  Buffer_Activation_Param):
+    if Buffer_Activation_Param == 1:
+        # print('buffer_effect_activate_over_time_for_phosphate', 't=', str(t))
+        # def lch(ca, cb):
+        #
+        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
+        #         return math.log10(ca / cb)
+        #     else:
+        #         return math.log10(abs(ca / cb))
+        #
+        # def ebuf(lc_h, pk, ca, cb, param_ebuf):
+        #     # pH equilibria of four buffer pairs
+        #     if param_ebuf == 0:
+        #         return 0
+        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
+        #         return lc_h - pk - math.log10(ca / cb)
+        #
+        #     else:
+        #         return lc_h - pk - math.log10(abs(ca / cb))
+
+        # LIS: see label {phosphate}
+        if qi_nh3_cell==1:
+           q_h_vary = q_h_vary + q_h2_vary - 1.e6 * qiamm
+           q_h2_vary = ebuf(lc_h, pk, c_h_vary, c_h2_vary, ebuf_Param)
+        else:
+           q_h_vary = q_h_vary + q_h2_vary
+           print('Buffer Effect for phosphate')
+           # LIS: see labela {pH_equilibria}, used as paired equations
+           q_h2_vary = ebuf(lc_h, pk, c_h_vary, c_h2_vary, ebuf_Param)
+    else:
+        print('No Buffer Effect for phosphate')
+        pass
+    return q_h_vary, q_h2_vary
 
 def eQs(guess, solver):
     # update variables
@@ -709,10 +764,109 @@ def eQs(guess, solver):
     # Electodiffusive fluxes  are proportional to the differences in electrochemical driving forces
     T_window = 15
     Transporters_progressive_activation_alongtime = 1
-    sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
-    kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
-        Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
-    print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
+    # sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
+    # kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
+    #     Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
+    # print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
+    if Transporters_progressive_activation_alongtime == 1:
+        sglt_mi_param = 0
+        nah2po4_mi_param = 0
+        clhco3_mi_param = 0
+        clhco2_mi_param = 0
+        nahco3_is_param = 0
+        nahco3_ie_param = 0
+        kcl_is_param = 0
+        kcl_ie_param = 0
+        na_clhco3_is_param = 0
+        na_clhco3_ie_param = 0
+        nah_param = 0
+        nak_atp_param = 0
+        h_mi_atp_param = 0
+        Time_Durtn = int(T / T_window)
+        n = 0 #int(2 * Time_Durtn)
+        if n < t < n + Time_Durtn:
+            print('No Transporter Yet at Time_Durtn' if t == Time_Durtn else '')
+        elif n + Time_Durtn <= t < n + 2 * Time_Durtn :
+            sglt_mi_param = 1
+            print('sglt_mi_param_activation at time =' + str(Time_Durtn) if t == n + 2 * Time_Durtn else '')
+        elif n + 2 * Time_Durtn <= t< n + 3* Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+        elif n + 3 * Time_Durtn <= t < n + 4 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+        elif n +4 * Time_Durtn <= t < n + 5 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+        elif n + 5 * Time_Durtn <= t< n + 6 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+        elif n + 6 * Time_Durtn <= t< n + 7 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+        elif n + 7 * Time_Durtn <= t < n + 8 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+        elif n + 8 * Time_Durtn <= t < n + 9 * Time_Durtn:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+        elif n + 9 * Time_Durtn <= t < n + 10 * Time_Durtn :
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+            nak_atp_param = 1
+        else:
+            sglt_mi_param = 1
+            nah2po4_mi_param = 1
+            clhco3_mi_param = 1
+            clhco2_mi_param = 1
+            nahco3_is_param = 1
+            nahco3_ie_param = 1
+            kcl_is_param = 1
+            kcl_ie_param = 1
+            na_clhco3_is_param = 1
+            na_clhco3_ie_param = 1
+            nah_param = 1
+            nak_atp_param = 1
+            h_mi_atp_param = 1
 
     # net transporters on mi bourder
     sglt = sglt_mi(cm_na, ci_na[t], cm_gluc, ci_gluc[t], z_na, z_gluc, vm[t], vi[t], ami, lmi_nagluc,
@@ -1083,7 +1237,7 @@ def eQs(guess, solver):
 # # sol(15)=' gluc'
 Nfac = 10
 t0 = 0
-tf = 1000
+tf = 3000
 T = int(tf * Nfac)
 dt = float(tf - t0) / float(T)
 print('dt', dt)
