@@ -4,11 +4,21 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 #from sympy import *
 import math
-from PCT_GLOB import *
+# from PCT_GLOB import *
+from PCT_GLOB_Flow_dependent_transport import *
 from scipy import optimize
 
-
-def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_gluc, z_na, vm, vi, ami, lmi_nagluc, param_sglt_mi):
+def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi):
+    # Na-glucose simple cotransporter with 1:1 stoichiometry, located on  Apical  Membrane
+    # return is the transported flux for each solute due to the existance of Na-glucose simple cotransporter.
+    # f_eps(): Modular function to calculate the electrochemical potential of species:(RT)*ln(c) + z*f*V
+    # see label: {eq:NAGluc}
+    # checking the unit consistency for Electrodiffusive_flux Equation:
+    # [mV] = 1.e-3[V]----> [mV] = 1.e-3 [Joule/Coul]
+    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mol][mV]
+    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mol]*1.e-3 [ Joule / Coul ]
+    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mmol]* 1.e-6 [ Joule / Coul ]
+    # [Electrodiffusive_flux] ----> [mmol/s] = [mmol2/Joule.s]*[Joule/mmol]
     if param_sglt_mi == 0:
         return[0, 0]
     else:
@@ -18,8 +28,52 @@ def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_gluc, z_na, vm, vi, ami, lmi_naglu
         xi_gluc = f_eps(ci_gluc, z_gluc, vi)
         na_mi_nagluc = lmi_nagluc * ami * (xm_na - xi_na + xm_gluc - xi_gluc)
         gluc_mi_nagluc = lmi_nagluc * ami * (xm_na - xi_na + xm_gluc - xi_gluc)
-        return[na_mi_nagluc, gluc_mi_nagluc]
+    return[na_mi_nagluc, gluc_mi_nagluc]
 
+
+def nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi_nah2po4, param_nah2po4_mi):
+    # Na-h2po4 simple cotransporter with 1:1 stoichiometry, located on  Apical  Membrane
+    # see label {eq: NAH2PO4}
+    if param_nah2po4_mi == 0:
+        return[0, 0]
+    else:
+        xm_na = f_eps(cm_na, z_na, vm)
+        xm_h2po4 = f_eps(cm_h2po4, z_h2po4, vm)
+        xi_na = f_eps(ci_na, z_na, vi)
+        xi_h2po4 = f_eps(ci_h2po4, z_h2po4, vi)
+        na_mi_nah2po4 = lmi_nah2po4 * ami * (xm_na - xi_na + xm_h2po4 - xi_h2po4)
+        h2po4_mi_nah2po4 = lmi_nah2po4 * ami * (xm_na - xi_na + xm_h2po4 - xi_h2po4)
+    return[na_mi_nah2po4, h2po4_mi_nah2po4]
+
+
+def clhco3_mi(cm_cl, ci_cl, cm_hco3, ci_hco3, z_cl, z_hco3, vm, vi, ami, lmi_clhco3, param_clhco3_mi):
+    # cl/hco3 simple exchanger with 1:-1 stoichiometry, located on Apical  Membrane.
+    # see label {eq: CLHCO3}
+    if param_clhco3_mi == 0:
+        return [ 0, 0 ]
+    else:
+        xm_cl = f_eps(cm_cl, z_cl, vm)
+        xm_hco3 = f_eps(cm_hco3, z_hco3, vm)
+        xi_cl = f_eps(ci_cl, z_cl, vi)
+        xi_hco3 = f_eps(ci_hco3, z_hco3, vi)
+        cl_mi_clhco3 = lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
+        hco3_mi_clhco3 = - lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
+    return [ cl_mi_clhco3, hco3_mi_clhco3 ]
+
+
+def clhco2_mi(cm_cl, ci_cl, cm_hco2, ci_hco2, z_cl, z_hco2, vm, vi, ami, lmi_clhco2, param_clhco2_mi):
+    # cl/hco2 simple exchanger with 1:-1 stoichiometry, located on Apical  Membrane.
+    # see label {eq:CLHCO2}
+    if param_clhco2_mi == 0:
+        return [ 0, 0 ]
+    else:
+        xm_cl = f_eps(cm_cl, z_cl, vm)
+        xm_hco2 = f_eps(cm_hco2, z_hco2, vm)
+        xi_cl = f_eps(ci_cl, z_cl, vi)
+        xi_hco2 = f_eps(ci_hco2, z_hco2, vi)
+        cl_mi_clhco2 = lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
+        hco2_mi_clhco2 = - lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
+        return [ cl_mi_clhco2, hco2_mi_clhco2 ]
 
 # proton pumps #checked
 def at_mi_h(cm_h, ci_h, vm, vi, z_h, ami, parama_mi_h):
@@ -84,18 +138,6 @@ def lch(ca, cb):
         return math.log10(abs(ca / cb))
 
 
-def clhco3_mi(cm_cl, ci_cl, cm_hco3, ci_hco3, z_cl, z_hco3, vm, vi, ami, lmi_clhco3, param_clhco3_mi):
-    if param_clhco3_mi == 0:
-        return[0, 0]
-    else:
-        xm_cl = f_eps(cm_cl, z_cl, vm)
-        xm_hco3 = f_eps(cm_hco3, z_hco3, vm)
-        xi_cl = f_eps(ci_cl, z_cl, vi)
-        xi_hco3 = f_eps(ci_hco3, z_hco3, vi)
-        cl_mi_clhco3 = lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
-        hco3_mi_clhco3 = - lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
-    return[cl_mi_clhco3, hco3_mi_clhco3]
-
 
 def nahco3_is(ci_na, cs_na, ci_hco3, cs_hco3, z_na, z_hco3, vi, vs, ais, lis_nahco3, param_nahco3_is):
     if param_nahco3_is == 0:
@@ -127,31 +169,20 @@ def na_clhco3_is(ci_na, cs_na, ci_cl, cs_cl, ci_hco3, cs_hco3, z_na, z_cl, z_hco
         return[na_na_clhco3, cl_na_clhco3, hco3_na_clhco3]
 
 
-def clhco2_mi(cm_cl, ci_cl, cm_hco2, ci_hco2, z_cl, z_hco2, vm, vi, ami, lmi_clhco2, param_clhco2_mi):
-    if param_clhco2_mi == 0:
+def kcl(ca_k, cb_k, ca_cl, cb_cl, z_k, z_cl, va, vb, a, l_kcl, param_kcl):
+    # k-cl simple cotransporter with 1:1 stoichiometry, located on Peritubular Membrane which
+    # includes both Cell-Lateral Membrane (ie) /Cell-Basal (is) Membrane.
+    # see label {eq:KCL}
+    if param_kcl == 0:
         return[0, 0]
     else:
-        xm_cl = f_eps(cm_cl, z_cl, vm)
-        xm_hco2 = f_eps(cm_hco2, z_hco2, vm)
-        xi_cl = f_eps(ci_cl, z_cl, vi)
-        xi_hco2 = f_eps(ci_hco2, z_hco2, vi)
-        cl_mi_clhco2 = lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
-        hco2_mi_clhco2 = - lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
-        return[cl_mi_clhco2, hco2_mi_clhco2]
-
-
-def nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi_nah2po4, param_nah2po4_mi):
-    if param_nah2po4_mi == 0:
-        return[0, 0]
-    else:
-        xm_na = f_eps(cm_na, z_na, vm)
-        xm_h2po4 = f_eps(cm_h2po4, z_h2po4, vm)
-        xi_na = f_eps(ci_na, z_na, vi)
-        xi_h2po4 = f_eps(ci_h2po4, z_h2po4, vi)
-        na_mi_nah2po4 = lmi_nah2po4 * ami * (xm_na - xi_na + xm_h2po4 - xi_h2po4)
-        h2po4_mi_nah2po4 = lmi_nah2po4 * ami * (xm_na - xi_na + xm_h2po4 - xi_h2po4)
-    return[na_mi_nah2po4, h2po4_mi_nah2po4]
-
+        xa_k = f_eps(ca_k, z_k, va)
+        xa_cl = f_eps(ca_cl, z_cl, va)
+        xb_k = f_eps(cb_k, z_k, vb)
+        xb_cl = f_eps(cb_cl, z_cl, vb)
+        k_kcl = l_kcl * a * (xa_k - xb_k + xa_cl - xb_cl)
+        cl_kcl = l_kcl * a * (xa_k - xb_k + xa_cl - xb_cl)
+    return [k_kcl, cl_kcl]
 
 def nah(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
     if param_nah == 0:
@@ -198,21 +229,6 @@ def nah(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
                                cmsnah_nh4 * cisnah_h - cmsnah_h * cisnah_nh4)
         # jnah_na_max = cxt * psnah_na * psnah_h / (psnah_na + psnah_h)
         return[jnah_na, jnah_h, jnah_nh4]
-
-
-def kcl_is(ci_k, cs_k, ci_cl, cs_cl, z_k, z_cl, vi, vs, ais, lis_kcl, param_kcl_is):
-    if param_kcl_is == 0:
-        return[0, 0]
-    else:
-        xi_k = f_eps(ci_k, z_k, vi)
-        xi_cl = f_eps(ci_cl, z_cl, vi)
-        xs_k = f_eps(cs_k, z_k, vs)
-        xs_cl = f_eps(cs_cl, z_cl, vs)
-        k_is_kcl = lis_kcl * ais * (xi_k - xs_k + xi_cl - xs_cl)
-        cl_is_kcl = lis_kcl * ais * (xi_k - xs_k + xi_cl - xs_cl)
-    return[k_is_kcl, cl_is_kcl]
-
-
 
 
 
@@ -956,9 +972,9 @@ def eQs(guess, solver):
     na_is_nahco3 = nahco3[0]
     hco3_is_nahco3 = nahco3[1]
 
-    kcl = kcl_is(ci_k[t], cs_k, ci_cl[t], cs_cl, z_k, z_cl, vi[t], vs, ais, lis_kcl, kcl_is_param)
-    k_is_kcl = kcl[0]
-    cl_is_kcl = kcl[1]
+    kcl_ais = kcl(ci_k[t], cs_k, ci_cl[t], cs_cl, z_k, z_cl, vi[t], vs, ais, lis_kcl, kcl_is_param)
+    k_is_kcl = kcl_ais[0]
+    cl_is_kcl = kcl_ais[1]
 
     na_clhco3 = na_clhco3_is(ci_na[t], cs_na, ci_cl[t], cs_cl, ci_hco3[t], cs_hco3, z_na, z_cl, z_hco3,
                              vi[t], vs, ais, lis_na_clhco3, na_clhco3_is_param)
@@ -995,7 +1011,7 @@ def eQs(guess, solver):
     na_aie_nahco3 = nahco3_aie[0]
     hco3_aie_nahco3 = nahco3_aie[1]
 
-    kcl_aie = kcl_is(ci_k[t], ce_k[t], ci_cl[t], ce_cl[t], z_k, z_cl, vi[t], ve[t], aie, lis_kcl, kcl_is_param)
+    kcl_aie = kcl(ci_k[t], ce_k[t], ci_cl[t], ce_cl[t], z_k, z_cl, vi[t], ve[t], aie, lis_kcl, kcl_is_param)
     k_aie_kcl = kcl_aie[0]
     cl_aie_kcl = kcl_aie[1]
 
