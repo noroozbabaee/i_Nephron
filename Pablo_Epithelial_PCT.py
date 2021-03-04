@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 #from sympy import *
 import math
-# from PCT_GLOB import *
+#from PCT_GLOB import *
 from PCT_GLOB_Flow_dependent_transport import *
 from scipy import optimize
 
@@ -194,12 +194,20 @@ def nah(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
         knah_h = 0.7200e-07
         knah_nh4 = 0.2700e-01
         knah_i = 0.1000e-05
+        #Flow dependent 2007
+        pnah_na = 0.792000e+04
+        pnah_h = 0.23800e+04
+        pnah_nh4 = 0.792000e+04
+        pnah_m = 0.0
+        pnah_mm = 0.2000e+01
+        # original model
+        # pnah_na = 0.8000e+04
+        # pnah_h = 0.2400e+04
+        # pnah_nh4 = 0.8000e+04
+        # pnah_m = 0.2000e+01
+        # pnah_mm = 0.0000
+        # 2007 Flow dependent
 
-        pnah_na = 0.8000e+04
-        pnah_h = 0.2400e+04
-        pnah_nh4 = 0.8000e+04
-        pnah_m = 0.2000e+01
-        pnah_mm = 0.0000
         # translate concentrations to the nah model
         psnah_na = pnah_na * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
         psnah_h = pnah_h * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
@@ -512,10 +520,10 @@ def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_cell, 
         # LIS: see label {phosphate}
         if qi_nh3_cell==1:
            q_h_vary = q_h_vary + q_h2_vary - 1.e6 * qiamm
-           q_h2_vary = lc_h - pk - math.log10(c_h_vary /c_h2_vary)
+           q_h2_vary = lc_h - pk - np.log10(c_h_vary /c_h2_vary)
         else:
            q_h_vary = q_h_vary + q_h2_vary
-           q_h2_vary = lc_h - pk - math.log10(c_h_vary /c_h2_vary)
+           q_h2_vary = lc_h - pk - np.log10(c_h_vary /c_h2_vary)
     else:
         print('No Buffer Effect for phosphate')
         pass
@@ -1364,7 +1372,7 @@ while True:
         cm_na = 0.14
         result = scipy.optimize.root(eQs, np.array(guess), 1)
         guess =[var[t] for var in vars]
-
+import numpy as np
 t = np.linspace(t0, tf, T)
 plot_concen = 1
 if plot_concen:
