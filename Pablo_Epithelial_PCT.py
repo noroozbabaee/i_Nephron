@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 #from sympy import *
 import math
-#from PCT_GLOB import *
-from PCT_GLOB_Flow_dependent_transport import *
+from PCT_GLOB import *
+#from PCT_GLOB_Flow_dependent_transport import *
 from scipy import optimize
 
 def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi):
@@ -83,60 +83,66 @@ def at_mi_h(cm_h, ci_h, vm, vi, z_h, ami, parama_mi_h):
     if parama_mi_h == 0:
         return 0
     elif gamma < 0:
-        return - lhp * ami * (1 - 1 / (1 + math.exp(gamma)))
-    return - lhp * ami * (1 / (1 + math.exp(-gamma)))
+        return  -lhp * ami * (1 - 1 / (1 + math.exp(gamma)))
+    return -lhp * ami * (1 / (1 + math.exp(-gamma)))
 
 
 # goldman fluxes (passive fluxes) describes the ionic flux across a cell membrane
 # as a function of the transmembrane potential and the concentrations of the ion inside and outside of the cell.
 # checked
 def goldman(hab, a, z, va, vb, ca, cb, param_goldman):
+    # Goldman Fluxes (passive fluxes) describes the ionic flux across a cell membrane
+    # as a function of the transmembrane potential and the concentrations of the ion inside and outside of the cell.
+    # see label {normalized_PD}
     zab = (z * f * (va - vb) * 1.e-6) / rte
     if param_goldman == 0:
         return[0]
     elif zab == 0 or va == vb and ca > 0 and cb > 0:
+        # see label {Fick_passive}
         return hab * a * (ca - cb)
-    elif zab > 0:
-        return hab * a * zab * (ca - cb * math.exp(-zab)) / (1 - math.exp(-zab))
     else:
-        return hab * a * zab * (ca * math.exp(zab) - cb) / (math.exp(zab) - 1)
+        # see label {Goldman_passive}
+        return hab * a * zab * (ca - cb * np.exp(-zab)) / (1 - np.exp(-zab))
 
 
-# Convective Solute Fluxes
-def CSF(ca, cb, flux, s, param_CSF):
-    if param_CSF == 0:
+def csf(ca, cb, flux, s, param_csf):
+    # convective solute fluxes
+    if param_csf == 0:
         return 0
 
-    # Definition of the mean membrane solute concentration #checked
     def lmmsc(ca, cb):
-        
+        # logarithmic mean membrane solute concentration
+        # see label {mean_concen}
         import math
-        if ca > 0 and cb > 0 and ca - cb != 0 and cb != 0 and math.log10(ca / cb) != 0:
+        if ca > 0 and cb > 0 and ca - cb != 0:
             return (ca - cb) / (math.log10(ca / cb))
         else:
+            print('ups')
             return cb
-
+    # see label {convective_flux}
+    # the input flux is the water fluxes, see label {water_flux}
     return flux * (1.00 - s) * lmmsc(ca, cb)
 
 
-def matrix(init, h):
-    return[init for x in range(h)]
+def matrix(init, h, tag):
+    if tag == 'clever':
+        a = 0.0e-4
+        b = 1.0e0
+    elif tag == 'arbitrary':
+        a = 1.0e-4
+        b = 0.0e0
+    return[a+b*init for x in range(h)]
 
 
 def f_eps(c, z, v):
+    # electrochemical potential of species
+    # see label {Electrochemical_P}
     if c > 0 and c != 0:
-        return rte * math.log10(c) + z * f * v * 1.e-6
+        return rte * math.log(c) + z * f * v * 1.e-6
     else:
-        return rte * math.log10(abs(c)) + z * f * v * 1.e-6
+        print('uy')
 
-
-def lch(ca, cb):
-    import math
-    if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
-        return math.log10(ca / cb)
-    else:
-        return math.log10(abs(ca / cb))
-
+        return rte * math.log(abs(c)) + z * f * v * 1.e-6
 
 
 def nahco3_is(ci_na, cs_na, ci_hco3, cs_hco3, z_na, z_hco3, vi, vs, ais, lis_nahco3, param_nahco3_is):
@@ -190,23 +196,27 @@ def nah(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
     else:
         # the nah model parameters
         cxt = 1.00
-        knah_na = 0.3000e-01
-        knah_h = 0.7200e-07
-        knah_nh4 = 0.2700e-01
-        knah_i = 0.1000e-05
-        #Flow dependent 2007
-        pnah_na = 0.792000e+04
-        pnah_h = 0.23800e+04
-        pnah_nh4 = 0.792000e+04
-        pnah_m = 0.0
-        pnah_mm = 0.2000e+01
-        # original model
+        # knah_na = 0.3000e-01
+        # knah_h = 0.7200e-07
+        # knah_nh4 = 0.2700e-01
+        # knah_i = 0.1000e-05
+        #
         # pnah_na = 0.8000e+04
         # pnah_h = 0.2400e+04
         # pnah_nh4 = 0.8000e+04
         # pnah_m = 0.2000e+01
         # pnah_mm = 0.0000
-        # 2007 Flow dependent
+
+        knah_na = 0.3000e-01
+        knah_h = 0.7200e-07
+        knah_nh4 = 0.2700e-01
+        knah_i = 0.1000e-05
+        #
+        pnah_na = 0.792000e+04
+        pnah_h = 0.23800e+04
+        pnah_nh4 = 0.792000e+04
+        pnah_mm = 0.2000e+01
+        pnah_m = 0.0000
 
         # translate concentrations to the nah model
         psnah_na = pnah_na * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
@@ -240,19 +250,20 @@ def nah(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
 
 
 
-def nak_atp(ci_k, cs_k, ci_na, cs_na, ce_k, ce_nh4, param_nak_atp):
+def nak_atp( ci_na, ce_na,ci_k,  ce_k, ce_nh4, param_nak_atp):
     if param_nak_atp == 0:
         return[0, 0, 0]
     else:
-        knpn = 0.0002 * (1.0 + ci_k / .00833)
         # sodium affinity
-        knpk = 0.0001 * (1.0 + cs_na / .0185)
+        knpn = 0.0002 * (1.0 + ci_k / .00833)
+
+        knpk = 0.0001 * (1.0 + ce_na / .0185)
         # atpase transporter flux in is membrane
-        atis_na = n_p * (ci_na / (knpn + ci_na)) ** 3 * (cs_k / (knpk + cs_k)) ** 2
+        atp_na = n_p * (ci_na / (knpn + ci_na)) ** 3 *( (ce_k + ce_nh4) / (knpk + ce_k + ce_nh4)) ** 2
         # alloW for competition betWeen k+ and nh4+
-        atis_k = -atis_na * 0.667 * ce_k / (ce_k + ce_nh4 / knh4)
-        atis_nh4 = -atis_na * 0.667 * ce_nh4 / (knh4 * ce_k + ce_nh4)
-        return[atis_na, atis_k, atis_nh4]
+        atp_k = -atp_na * 0.667 * ce_k / (ce_k + ce_nh4 / knh4)
+        atp_nh4 = -atp_na * 0.667 * ce_nh4 / (knh4 * ce_k + ce_nh4)
+        return[atp_na, atp_k, atp_nh4]
 
 
 # pH equilibria of four buffer pairs
@@ -289,9 +300,9 @@ def BuffPairs_Progres_Activ(BuffPairs_progressive_activation_alongtime, t, T, T_
         Buffer_HCO2_LIS_Param = 0
         Buffer_HCO2_CELL_Param = 0
         Time_Durtn = int(T / T_window)
-        print('Time_Durtn', str(Time_Durtn))
+        #print('Time_Durtn', str(Time_Durtn))
         if t == n + 11 * Time_Durtn:
-            print('BufferPairs_activation at time =' + str(t) if t == 11 * Time_Durtn else '')
+            pass#print('BufferPairs_activation at time =' + str(t) if t == 11 * Time_Durtn else '')
         elif int(n + 11 * Time_Durtn) < t <= int(n + 12 * Time_Durtn):
             Buffer_Co2_Cell_Param = 1
             Buffer_Co2_LIS_Param = 1
@@ -499,12 +510,12 @@ def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po
         # co2, formate, phosphate, and ammonia content:
         # print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
         if flow_dependent == 1:
-            q_hco3 = + q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4 - q_cb
+            q_hco3 = - q_h - q_nh4 + q_hco3 - q_h2co2 - q_h2po4 + q_cb
             q_h2co3 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
             q_co2  = q_hco3 + q_h2co3 + q_co2
         else:
         # print('No Buffer Effect for co2, formate, phosphate, and ammonia')
-            q_hco3 = + q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4
+            q_hco3 = - q_h - q_nh4 + q_hco3 - q_h2co2 - q_h2po4
             # LIS: hydration and dhydration of co2
             # see label {co2_hyd_dhyd}
             q_h2co3 = q_co2 + scale * volume * (khy * c_co2 - kdhy * c_h2co3)
@@ -518,33 +529,42 @@ def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_cell, 
     if Buffer_Activation_Param == 1:
         #  pH equilibria of four buffer pairs
         # LIS: see label {phosphate}
-        if qi_nh3_cell==1:
+        if qi_nh3_cell == 1:
            q_h_vary = q_h_vary + q_h2_vary - 1.e6 * qiamm
-           q_h2_vary = lc_h - pk - np.log10(c_h_vary /c_h2_vary)
+           q_h2_vary = lc_h - pk - np.log10(abs(c_h_vary /c_h2_vary))
+
+           # q_h2_vary = lc_h - pk - np.log10(c_h_vary / c_h2_vary)
         else:
            q_h_vary = q_h_vary + q_h2_vary
-           q_h2_vary = lc_h - pk - np.log10(c_h_vary /c_h2_vary)
+           # print('c_h_vary', c_h_vary)
+           # print('c_h2_vary', c_h2_vary)
+           q_h2_vary = lc_h - pk - np.log10(abs(c_h_vary /c_h2_vary))
+           # q_h2_vary = lc_h - pk - np.log10((c_h_vary / c_h2_vary))
     else:
-        print('No Buffer Effect for phosphate')
+        #print('No Buffer Effect for phosphate')
         pass
     return q_h_vary, q_h2_vary
 
-def eQs(guess, solver):
+def eQs(guess):
     # update variables
     for i in range(len(guess)):
         vars[i][t] = guess[i]
     # Weinstein (2007)
     # Flow-dependent transport in a mathematical model of rat proximal tubule
-    ae[t] = ae0 * (1 + mua * (pe[t] - pm))
+    ae[t] = 0.02 * (1 + 0.1* (pe[t] - pm))
     ae[t] = ae0 if ae[t] < ae0 else ae[t]
 
-    chvl[t] = chvl0 * (1.0 + muv * (pe[t] - pm))
+    chvl[t] = 0.7e-4 * (1.0 + 0.1* (pe[t] - pm))
     chvl[t] = chvl0 if chvl[t] < chvl0 else chvl[t]
     l[t] = chvl[t]
 
     # LOG Conc. of Hydrogen Interspace
-    lche = pkc + lch(ce_hco3[t], ce_h2co3[t])
+    lche = pkc + np.log10(ce_hco3[t]/ ce_h2co3[t])
     ce_h[t] = 10 ** (-lche)
+    print('ce_hpo4 [ t ]', ce_hpo4 [ t ])
+    # print('ce_h2po4 [ t ]', ce_h2po4 [ t ])
+    # lche = -(pkp + np.log10(abs(ce_hpo4 [ t ]/ ce_h2po4 [ t ])))
+    # ce_h [ t ] = 10 ** lche
 
     # ELECTROLYTE TRANSPORT ACROSS A SIMPLE EPITHELIUM of the rat proximal tubule (1992)
     # The cell volume is presented as a function of the inverse cell impermeant species concentration
@@ -553,12 +573,18 @@ def eQs(guess, solver):
 
     # The cell height (summation of Extracellular channel volume
     # and Intracellular compartment volume[cm3/cm2 epithelium])
+    lchi = pkc + np.log10(ci_hco3 [ t ]/ ci_h2co3 [ t ])
+    ce_h [ t ] = 10 ** (-lchi)
+
     l[t] = l[t] + clvl[t]
     p_i = pm
 
     # LOG Conc. of Hydrogen Cell
-    lchi = pkc + lch(ci_hco3[t], ci_h2co3[t])
-    ci_h[t] = 10 ** (-lchi)
+
+
+    lchi = -(pkp + math.log10(abs(ci_hpo4 [ t ]/ ci_h2po4 [ t ])))
+    ci_h [ t ] = 10 ** lchi
+
     # ELECTROLYTE TRANSPORT ACROSS A SIMPLE EPITHELIUM 1979
     # Applying the Kedem and Katchalsky relations:
     # The membrane transport for nonelectrolyte solutions generated by the hydrostatic
@@ -656,86 +682,86 @@ def eQs(guess, solver):
                     ce_gluc[t] - ci_gluc[t]))
 
     # Convective Intraepithelial Solute Fluxes
-    param_CSF = 1
-    fekm_na = CSF(ce_na[t], cm_na, fevm, sme_na, param_CSF)
-    fekm_k = CSF(ce_k[t], cm_k, fevm, sme_k, param_CSF)
-    fekm_cl = CSF(ce_cl[t], cm_cl, fevm, sme_cl, param_CSF)
-    fekm_hco3 = CSF(ce_hco3[t], cm_hco3, fevm, sme_hco3, param_CSF)
-    fekm_h2co3 = CSF(ce_h2co3[t], cm_h2co3, fevm, sme_h2co3, param_CSF)
-    fekm_co2 = CSF(ce_co2[t], cm_co2, fevm, sme_co2, param_CSF)
-    fekm_hpo4 = CSF(ce_hpo4[t], cm_hpo4, fevm, sme_hpo4, param_CSF)
-    fekm_h2po4 = CSF(ce_h2po4[t], cm_h2po4, fevm, sme_h2po4, param_CSF)
-    fekm_urea = CSF(ce_urea[t], cm_urea, fevm, sme_urea, param_CSF)
-    fekm_nh3 = CSF(ce_nh3[t], cm_nh3, fevm, sme_nh3, param_CSF)
-    fekm_nh4 = CSF(ce_nh4[t], cm_nh4, fevm, sme_nh4, param_CSF)
-    fekm_h = CSF(ce_h[t], cm_h, fevm, sme_h, param_CSF)
-    fekm_hco2 = CSF(ce_hco2[t], cm_hco2, fevm, sme_hco2, param_CSF)
-    fekm_h2co2 = CSF(ce_h2co2[t], cm_h2co2, fevm, sme_h2co2, param_CSF)
-    fekm_gluc = CSF(ce_gluc[t], cm_gluc, fevm, sme_gluc, param_CSF)
+    param_csf = 1
+    fekm_na = csf(ce_na[t], cm_na, fevm, sme_na, param_csf)
+    fekm_k = csf(ce_k[t], cm_k, fevm, sme_k, param_csf)
+    fekm_cl = csf(ce_cl[t], cm_cl, fevm, sme_cl, param_csf)
+    fekm_hco3 = csf(ce_hco3[t], cm_hco3, fevm, sme_hco3, param_csf)
+    fekm_h2co3 = csf(ce_h2co3[t], cm_h2co3, fevm, sme_h2co3, param_csf)
+    fekm_co2 = csf(ce_co2[t], cm_co2, fevm, sme_co2, param_csf)
+    fekm_hpo4 = csf(ce_hpo4[t], cm_hpo4, fevm, sme_hpo4, param_csf)
+    fekm_h2po4 = csf(ce_h2po4[t], cm_h2po4, fevm, sme_h2po4, param_csf)
+    fekm_urea = csf(ce_urea[t], cm_urea, fevm, sme_urea, param_csf)
+    fekm_nh3 = csf(ce_nh3[t], cm_nh3, fevm, sme_nh3, param_csf)
+    fekm_nh4 = csf(ce_nh4[t], cm_nh4, fevm, sme_nh4, param_csf)
+    fekm_h = csf(ce_h[t], cm_h, fevm, sme_h, param_csf)
+    fekm_hco2 = csf(ce_hco2[t], cm_hco2, fevm, sme_hco2, param_csf)
+    fekm_h2co2 = csf(ce_h2co2[t], cm_h2co2, fevm, sme_h2co2, param_csf)
+    fekm_gluc = csf(ce_gluc[t], cm_gluc, fevm, sme_gluc, param_csf)
 
-    feks_na = CSF(ce_na[t], cs_na, fevs, ses_na, param_CSF)
-    feks_k = CSF(ce_k[t], cs_k, fevs, ses_k, param_CSF)
-    feks_cl = CSF(ce_cl[t], cs_cl, fevs, ses_cl, param_CSF)
-    feks_hco3 = CSF(ce_hco3[t], cs_hco3, fevs, ses_hco3, param_CSF)
-    feks_h2co3 = CSF(ce_h2co3[t], cs_h2co3, fevs, ses_h2co3, param_CSF)
-    feks_co2 = CSF(ce_co2[t], cs_co2, fevs, ses_co2, param_CSF)
-    feks_hpo4 = CSF(ce_hpo4[t], cs_hpo4, fevs, ses_hpo4, param_CSF)
-    feks_h2po4 = CSF(ce_h2po4[t], cs_h2po4, fevs, ses_h2po4, param_CSF)
-    feks_urea = CSF(ce_urea[t], cs_urea, fevs, ses_urea, param_CSF)
-    feks_nh3 = CSF(ce_nh3[t], cs_nh3, fevs, ses_nh3, param_CSF)
-    feks_nh4 = CSF(ce_nh4[t], cs_nh4, fevs, ses_nh4, param_CSF)
-    feks_h = CSF(ce_h[t], cs_h, fevs, ses_h, param_CSF)
-    feks_hco2 = CSF(ce_hco2[t], cs_hco2, fevs, ses_hco2, param_CSF)
-    feks_h2co2 = CSF(ce_h2co2[t], cs_h2co2, fevs, ses_h2co2, param_CSF)
-    feks_gluc = CSF(ce_gluc[t], cs_gluc, fevs, ses_gluc, param_CSF)
+    feks_na = csf(ce_na[t], cs_na, fevs, ses_na, param_csf)
+    feks_k = csf(ce_k[t], cs_k, fevs, ses_k, param_csf)
+    feks_cl = csf(ce_cl[t], cs_cl, fevs, ses_cl, param_csf)
+    feks_hco3 = csf(ce_hco3[t], cs_hco3, fevs, ses_hco3, param_csf)
+    feks_h2co3 = csf(ce_h2co3[t], cs_h2co3, fevs, ses_h2co3, param_csf)
+    feks_co2 = csf(ce_co2[t], cs_co2, fevs, ses_co2, param_csf)
+    feks_hpo4 = csf(ce_hpo4[t], cs_hpo4, fevs, ses_hpo4, param_csf)
+    feks_h2po4 = csf(ce_h2po4[t], cs_h2po4, fevs, ses_h2po4, param_csf)
+    feks_urea = csf(ce_urea[t], cs_urea, fevs, ses_urea, param_csf)
+    feks_nh3 = csf(ce_nh3[t], cs_nh3, fevs, ses_nh3, param_csf)
+    feks_nh4 = csf(ce_nh4[t], cs_nh4, fevs, ses_nh4, param_csf)
+    feks_h = csf(ce_h[t], cs_h, fevs, ses_h, param_csf)
+    feks_hco2 = csf(ce_hco2[t], cs_hco2, fevs, ses_hco2, param_csf)
+    feks_h2co2 = csf(ce_h2co2[t], cs_h2co2, fevs, ses_h2co2, param_csf)
+    feks_gluc = csf(ce_gluc[t], cs_gluc, fevs, ses_gluc, param_csf)
 
-    fikm_na = CSF(ci_na[t], cm_na, fivm, smi_na, param_CSF)
-    fikm_k = CSF(ci_k[t], cm_k, fivm, smi_k, param_CSF)
-    fikm_cl = CSF(ci_cl[t], cm_cl, fivm, smi_cl, param_CSF)
-    fikm_hco3 = CSF(ci_hco3[t], cm_hco3, fivm, smi_hco3, param_CSF)
-    fikm_h2co3 = CSF(ci_h2co3[t], cm_h2co3, fivm, smi_h2co3, param_CSF)
-    fikm_co2 = CSF(ci_co2[t], cm_co2, fivm, smi_co2, param_CSF)
-    fikm_hpo4 = CSF(ci_hpo4[t], cm_hpo4, fivm, smi_hpo4, param_CSF)
-    fikm_h2po4 = CSF(ci_h2po4[t], cm_h2po4, fivm, smi_h2po4, param_CSF)
-    fikm_urea = CSF(ci_urea[t], cm_urea, fivm, smi_urea, param_CSF)
-    fikm_nh3 = CSF(ci_nh3[t], cm_nh3, fivm, smi_nh3, param_CSF)
-    fikm_nh4 = CSF(ci_nh4[t], cm_nh4, fivm, smi_nh4, param_CSF)
-    fikm_h = CSF(ci_h[t], cm_h, fivm, smi_h, param_CSF)
-    fikm_hco2 = CSF(ci_hco2[t], cm_hco2, fivm, smi_hco2, param_CSF)
-    fikm_h2co2 = CSF(ci_h2co2[t], cm_h2co2, fivm, smi_h2co2, param_CSF)
-    fikm_gluc = CSF(ci_gluc[t], cm_gluc, fivm, smi_gluc, param_CSF)
+    fikm_na = csf(ci_na[t], cm_na, fivm, smi_na, param_csf)
+    fikm_k = csf(ci_k[t], cm_k, fivm, smi_k, param_csf)
+    fikm_cl = csf(ci_cl[t], cm_cl, fivm, smi_cl, param_csf)
+    fikm_hco3 = csf(ci_hco3[t], cm_hco3, fivm, smi_hco3, param_csf)
+    fikm_h2co3 = csf(ci_h2co3[t], cm_h2co3, fivm, smi_h2co3, param_csf)
+    fikm_co2 = csf(ci_co2[t], cm_co2, fivm, smi_co2, param_csf)
+    fikm_hpo4 = csf(ci_hpo4[t], cm_hpo4, fivm, smi_hpo4, param_csf)
+    fikm_h2po4 = csf(ci_h2po4[t], cm_h2po4, fivm, smi_h2po4, param_csf)
+    fikm_urea = csf(ci_urea[t], cm_urea, fivm, smi_urea, param_csf)
+    fikm_nh3 = csf(ci_nh3[t], cm_nh3, fivm, smi_nh3, param_csf)
+    fikm_nh4 = csf(ci_nh4[t], cm_nh4, fivm, smi_nh4, param_csf)
+    fikm_h = csf(ci_h[t], cm_h, fivm, smi_h, param_csf)
+    fikm_hco2 = csf(ci_hco2[t], cm_hco2, fivm, smi_hco2, param_csf)
+    fikm_h2co2 = csf(ci_h2co2[t], cm_h2co2, fivm, smi_h2co2, param_csf)
+    fikm_gluc = csf(ci_gluc[t], cm_gluc, fivm, smi_gluc, param_csf)
 
-    fiks_na = CSF(ci_na[t], cs_na, fivs, sis_na, param_CSF)
-    fiks_k = CSF(ci_k[t], cs_k, fivs, sis_k, param_CSF)
-    fiks_cl = CSF(ci_cl[t], cs_cl, fivs, sis_cl, param_CSF)
-    fiks_hco3 = CSF(ci_hco3[t], cs_hco3, fivs, sis_hco3, param_CSF)
-    fiks_h2co3 = CSF(ci_h2co3[t], cs_h2co3, fivs, sis_h2co3, param_CSF)
-    fiks_co2 = CSF(ci_co2[t], cs_co2, fivs, sis_co2, param_CSF)
-    fiks_hpo4 = CSF(ci_hpo4[t], cs_hpo4, fivs, sis_hpo4, param_CSF)
-    fiks_h2po4 = CSF(ci_h2po4[t], cs_h2po4, fivs, sis_h2po4, param_CSF)
-    fiks_urea = CSF(ci_urea[t], cs_urea, fivs, sis_urea, param_CSF)
-    fiks_nh3 = CSF(ci_nh3[t], cs_nh3, fivs, sis_nh3, param_CSF)
-    fiks_nh4 = CSF(ci_nh4[t], cs_nh4, fivs, sis_nh4, param_CSF)
-    fiks_h = CSF(ci_h[t], cs_h, fivs, sis_h, param_CSF)
-    fiks_hco2 = CSF(ci_hco2[t], cs_hco2, fivs, sis_hco2, param_CSF)
-    fiks_h2co2 = CSF(ci_h2co2[t], cs_h2co2, fivs, sis_h2co2, param_CSF)
-    fiks_gluc = CSF(ci_gluc[t], cs_gluc, fivs, sis_gluc, param_CSF)
+    fiks_na = csf(ci_na[t], cs_na, fivs, sis_na, param_csf)
+    fiks_k = csf(ci_k[t], cs_k, fivs, sis_k, param_csf)
+    fiks_cl = csf(ci_cl[t], cs_cl, fivs, sis_cl, param_csf)
+    fiks_hco3 = csf(ci_hco3[t], cs_hco3, fivs, sis_hco3, param_csf)
+    fiks_h2co3 = csf(ci_h2co3[t], cs_h2co3, fivs, sis_h2co3, param_csf)
+    fiks_co2 = csf(ci_co2[t], cs_co2, fivs, sis_co2, param_csf)
+    fiks_hpo4 = csf(ci_hpo4[t], cs_hpo4, fivs, sis_hpo4, param_csf)
+    fiks_h2po4 = csf(ci_h2po4[t], cs_h2po4, fivs, sis_h2po4, param_csf)
+    fiks_urea = csf(ci_urea[t], cs_urea, fivs, sis_urea, param_csf)
+    fiks_nh3 = csf(ci_nh3[t], cs_nh3, fivs, sis_nh3, param_csf)
+    fiks_nh4 = csf(ci_nh4[t], cs_nh4, fivs, sis_nh4, param_csf)
+    fiks_h = csf(ci_h[t], cs_h, fivs, sis_h, param_csf)
+    fiks_hco2 = csf(ci_hco2[t], cs_hco2, fivs, sis_hco2, param_csf)
+    fiks_h2co2 = csf(ci_h2co2[t], cs_h2co2, fivs, sis_h2co2, param_csf)
+    fiks_gluc = csf(ci_gluc[t], cs_gluc, fivs, sis_gluc, param_csf)
 
-    jk_na = CSF(ci_na[t], ce_na[t], jv, sis_na, param_CSF)
-    jk_k = CSF(ci_k[t], ce_k[t], jv, sis_k, param_CSF)
-    jk_cl = CSF(ci_cl[t], ce_cl[t], jv, sis_cl, param_CSF)
-    jk_hco3 = CSF(ci_hco3[t], ce_hco3[t], jv, sis_hco3, param_CSF)
-    jk_h2co3 = CSF(ci_h2co3[t], ce_h2co3[t], jv, sis_h2co3, param_CSF)
-    jk_co2 = CSF(ci_co2[t], ce_co2[t], jv, sis_co2, param_CSF)
-    jk_hpo4 = CSF(ci_hpo4[t], ce_hpo4[t], jv, sis_hpo4, param_CSF)
-    jk_h2po4 = CSF(ci_h2po4[t], ce_h2po4[t], jv, sis_h2po4, param_CSF)
-    jk_urea = CSF(ci_urea[t], ce_urea[t], jv, sis_urea, param_CSF)
-    jk_nh3 = CSF(ci_nh3[t], ce_nh3[t], jv, sis_nh3, param_CSF)
-    jk_nh4 = CSF(ci_nh4[t], ce_nh4[t], jv, sis_nh4, param_CSF)
-    jk_h = CSF(ci_h[t], ce_h[t], jv, sis_h, param_CSF)
-    jk_hco2 = CSF(ci_hco2[t], ce_hco2[t], jv, sis_hco2, param_CSF)
-    jk_h2co2 = CSF(ci_h2co2[t], ce_h2co2[t], jv, sis_h2co2, param_CSF)
-    jk_gluc = CSF(ci_gluc[t], ce_gluc[t], jv, sis_gluc, param_CSF)
+    jk_na = csf(ci_na[t], ce_na[t], jv, sis_na, param_csf)
+    jk_k = csf(ci_k[t], ce_k[t], jv, sis_k, param_csf)
+    jk_cl = csf(ci_cl[t], ce_cl[t], jv, sis_cl, param_csf)
+    jk_hco3 = csf(ci_hco3[t], ce_hco3[t], jv, sis_hco3, param_csf)
+    jk_h2co3 = csf(ci_h2co3[t], ce_h2co3[t], jv, sis_h2co3, param_csf)
+    jk_co2 = csf(ci_co2[t], ce_co2[t], jv, sis_co2, param_csf)
+    jk_hpo4 = csf(ci_hpo4[t], ce_hpo4[t], jv, sis_hpo4, param_csf)
+    jk_h2po4 = csf(ci_h2po4[t], ce_h2po4[t], jv, sis_h2po4, param_csf)
+    jk_urea = csf(ci_urea[t], ce_urea[t], jv, sis_urea, param_csf)
+    jk_nh3 = csf(ci_nh3[t], ce_nh3[t], jv, sis_nh3, param_csf)
+    jk_nh4 = csf(ci_nh4[t], ce_nh4[t], jv, sis_nh4, param_csf)
+    jk_h = csf(ci_h[t], ce_h[t], jv, sis_h, param_csf)
+    jk_hco2 = csf(ci_hco2[t], ce_hco2[t], jv, sis_hco2, param_csf)
+    jk_h2co2 = csf(ci_h2co2[t], ce_h2co2[t], jv, sis_h2co2, param_csf)
+    jk_gluc = csf(ci_gluc[t], ce_gluc[t], jv, sis_gluc, param_csf)
 
     # Goldman Fluxes: fluxes due to diffusion and electrical potential difference for
     # all of the ions that are permeant through the membrane
@@ -847,12 +873,12 @@ def eQs(guess, solver):
     # in electrochemical driving forces
     # Updating flux equations with electodiffusive fluxes (transporters).
     # Electodiffusive fluxes  are proportional to the differences in electrochemical driving forces
-    T_window = 15
+    T_window = 45
     Transporters_progressive_activation_alongtime = 1
     sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
     kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
         Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
-    print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
+    #print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
     # if Transporters_progressive_activation_alongtime == 1:
     #     sglt_mi_param = 0
     #     nah2po4_mi_param = 0
@@ -954,11 +980,13 @@ def eQs(guess, solver):
     #         h_mi_atp_param = 1
 
     # net transporters on mi bourder
+    #sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi)
     sglt = sglt_mi(cm_na, ci_na[t], cm_gluc, ci_gluc[t], z_na, z_gluc, vm[t], vi[t], ami, lmi_nagluc,
                    sglt_mi_param)
     na_mi_nagluc = sglt[0]
     gluc_mi_nagluc = sglt[1]
 
+   # nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi_nah2po4, param_nah2po4_mi
     nah2po4 = nah2po4_mi(cm_na, ci_na[t], cm_h2po4, ci_h2po4[t], z_na, z_h2po4, vm[t], vi[t], ami,
                          lmi_nah2po4, nah2po4_mi_param)
     na_mi_nah2po4 = nah2po4[0]
@@ -1036,7 +1064,7 @@ def eQs(guess, solver):
     jk_hco3 = jk_hco3 + hco3_aie_na_clhco3 + hco3_aie_nahco3
 
     # sodium pumps on mi bourder
-    nak = nak_atp(ci_k[t], cs_k, ci_na[t], cs_na, ce_k[t], ce_nh4[t], nak_atp_param)
+    nak = nak_atp(ci_na[t], ce_na[t], ci_k[t],  ce_k[t], ce_nh4[t], nak_atp_param)
     atis_na = nak[0]
     atis_k = nak[1]
     atis_nh4 = nak[2]
@@ -1192,7 +1220,24 @@ def eQs(guess, solver):
     phi[26] = phii_urea
     phii_gluc = qi_gluc
     phi[31] = phii_gluc
-
+    phi [ 5 ] = qe_hco3
+    phi [ 6 ] = qe_h2co3
+    phi [ 7 ] = qe_co2
+    phi [ 21 ] = qi_hco3
+    phi [ 23 ] = qi_co2
+    phi [ 22 ] = qi_h2co3
+    phi [ 11 ] = qe_nh3
+    phi [ 12 ] = qe_nh4
+    phi [ 27 ] = qi_nh3
+    phi [ 28 ] = qi_nh4
+    phi [ 13 ] = qe_hco2
+    phi [ 14 ] = qe_h2co2
+    phi [ 29 ] = qi_hco2
+    phi [ 30 ] = qi_h2co2
+    phi [ 8 ] = qe_hpo4
+    phi [ 9 ] = qe_h2po4
+    phi [ 24 ] = qi_hpo4
+    phi [ 25 ] = qi_h2po4
 
 
     # co2, formate, phosphate, and ammonia content:
@@ -1216,7 +1261,7 @@ def eQs(guess, solver):
 
     phi [ 8 ], phi [ 9 ] = Buff_Activ(qe_hpo4, qe_h2po4, lche, pkp, ce_hpo4 [ t ], ce_h2po4 [ t ],
                                       0, Buffer_HPO4_LIS_Param)
-    print('phi [ 8 ], phi [ 9 ]', phi [ 8 ], phi [ 9 ])
+    #print('phi [ 8 ], phi [ 9 ]', phi [ 8 ], phi [ 9 ])
 
     phi [ 24 ], phi [ 25 ] = Buff_Activ(qi_hpo4, qi_h2po4, lchi, pkp, ci_hpo4 [ t ], ci_h2po4 [ t ],
                                         0, Buffer_HPO4_CELL_Param)
@@ -1227,7 +1272,7 @@ def eQs(guess, solver):
                                         0, Buffer_NH3_LIS_Param)
 
     phi [ 27 ], phi [ 28 ] = Buff_Activ(qi_nh3, qi_nh4, lchi, pkn, ci_nh3 [ t ], ci_nh4 [ t ],
-                                       1, Buffer_NH3_CELL_Param)
+                                       1 , Buffer_NH3_CELL_Param)
 
     # LIS & CELL: see label {formate}
     # LIS & CELL: see labela {pH_equilibria}, used as paired equations
@@ -1253,7 +1298,7 @@ def eQs(guess, solver):
                                                                                ce_h2co3 [ t ], chvl [ t ], scale, 0,
                                                                                Buffer_Co2_LIS_Param)
 
-    print('phi [5 ], phi [ 6 ]', phi [ 5 ], phi [ 6 ])
+    #print('phi [5 ], phi [ 6 ]', phi [ 5 ], phi [ 6 ])
     phi [ 21 ], phi [ 22 ], phi [ 23 ] = Buff_Activ_co2_formate_phosphate_ammonia(qi_h, qi_nh4, qi_hco3, qi_h2co2,
                                                                                   qi_h2po4, qi_co2, qi_h2co3, qi_cb,
                                                                                   ci_co2 [ t ],
@@ -1295,60 +1340,68 @@ def eQs(guess, solver):
 # # sol(15)=' gluc'
 Nfac = 10
 t0 = 0
-tf = 500
+tf = 300
 T = int(tf * Nfac)
 dt = float(tf - t0) / float(T)
-print('dt', dt)
+tag = 'clever'
+#print('dt', dt)
 rtau = 1/dt
-ve = matrix(-0.89432938258185330771e-02, T)
-pe = matrix(-0.23093764341580683919e+02, T)
-ce_na = matrix(0.14040045563695688347e+00, T)
-ce_k = matrix(0.46537228854932385230e-02, T)
-ce_cl = matrix(0.11200865813019536543e+00, T)
-ce_hco3 = matrix(0.25607874636347928432e-01, T)
-ce_h2co3 = matrix(0.43754640651881161056e-05, T)
-ce_co2 = matrix(0.14987447089135489450e-02, T)
-ce_hpo4 = matrix(0.29852338056241254673e-02, T)
-ce_h2po4 = matrix(0.86622197071977683099e-03, T)
-ce_urea = matrix(0.49046959853563188228e-02, T)
-ce_nh3 = matrix(0.26914919565666300082e-05, T)
-ce_nh4 = matrix(0.17484103066624158852e-03, T)
-ce_hco2 = matrix(0.77584319325420768570e-03, T)
-ce_h2co2 = matrix(0.20531685246992843752e-06, T)
-ce_gluc = matrix(0.77236905064622532815e-02, T)
-vi = matrix(-0.54945785940474827669e+02, T)
-p_i = matrix(0.66971984470614129292e-01, T)
-ci_na = matrix(0.20443615264909884011e-01, T)
-ci_k = matrix(0.13742335290954643678e+00, T)
-ci_cl = matrix(0.16901004032978079322e-01, T)
-ci_hco3 = matrix(0.25090576334173893269e-01, T)
-ci_h2co3 = matrix(0.43750529566888027647e-05, T)
-ci_co2 = matrix(0.14988418688838011684e-02, T)
-ci_hpo4 = matrix(0.94254445085816557920e-02, T)
-ci_h2po4 = matrix(0.27910960064784369992e-02, T)
-ci_urea = matrix(0.49546890743651676378e-02, T)
-ci_nh3 = matrix(0.35291888877349245763e-05, T)
-ci_nh4 = matrix(0.23396304517990653771e-03, T)
-ci_hco2 = matrix(0.53552249401043496273e-03, T)
-ci_h2co2 = matrix(0.93379252815431763174e-07, T)
-ci_gluc = matrix(0.14876174248492728819e-01, T)
-hcbuf = matrix(0.26959905796615793450e-01, T)
-cbuf = matrix(0.40012078673998335843e-01, T)
-vm = matrix(-0.18573662594736270459e+00, T)
-ce_h = matrix(4.59e-11, T)
-ci_h = matrix(4.69e-11, T)
-ae = matrix(0.02000, T)
-chvl = matrix(0.7000e-04, T)
-clvl = matrix(0.1000e-02, T)
-l = matrix(0.1000e-02, T)
-imp = matrix(0.6000e-01, T)
-rm = matrix(0.1250e-02, T)
-am = matrix(0, T)
-phi = matrix(0, 35)
-lchm = pkc + math.log10(cm_hco3 / cm_h2co3)
-lchs = pkc + math.log10(cs_hco3 / cs_h2co3)
-cm_h = 10. ** (-lchm)
-cs_h = 10. ** (-lchs)
+ve = matrix(-0.01432938258185330771e-02, T, tag)
+pe = matrix(-0.23093764341580683919e+02, T, tag)
+ce_na = matrix(0.14040045563695688347e+00, T, tag)
+ce_k = matrix(0.46537228854932385230e-02, T, tag)
+ce_cl = matrix(0.11200865813019536543e+00, T, tag)
+ce_hco3 = matrix(0.25607874636347928432e-01, T, tag)
+ce_h2co3 = matrix(0.43754640651881161056e-05, T, tag)
+ce_co2 = matrix(0.14987447089135489450e-02, T, tag)
+ce_hpo4 = matrix(0.29852338056241254673e-02, T, tag)
+ce_h2po4 = matrix(0.86622197071977683099e-03, T, tag)
+ce_urea = matrix(0.49046959853563188228e-02, T, tag)
+ce_nh3 = matrix(0.26914919565666300082e-05, T, tag)
+ce_nh4 = matrix(0.17484103066624158852e-03, T, tag)
+ce_hco2 = matrix(0.77584319325420768570e-03, T, tag)
+ce_h2co2 = matrix(0.20531685246992843752e-06, T, tag)
+ce_gluc = matrix(0.77236905064622532815e-02, T, tag)
+vi = matrix(-0.54945785940474827669e+02, T, tag)
+p_i = matrix(0.66971984470614129292e-01, T, tag)
+ci_na = matrix(0.20443615264909884011e-01, T, tag)
+ci_k = matrix(0.13742335290954643678e+00, T, tag)
+ci_cl = matrix(0.16901004032978079322e-01, T, tag)
+ci_hco3 = matrix(0.25090576334173893269e-01, T, tag)
+ci_h2co3 = matrix(0.43750529566888027647e-05, T, tag)
+ci_co2 = matrix(0.14988418688838011684e-02, T, tag)
+ci_hpo4 = matrix(0.94254445085816557920e-02, T, tag)
+ci_h2po4 = matrix(0.27910960064784369992e-02, T, tag)
+ci_urea = matrix(0.49546890743651676378e-02, T, tag)
+ci_nh3 = matrix(0.35291888877349245763e-05, T, tag)
+ci_nh4 = matrix(0.23396304517990653771e-03, T, tag)
+ci_hco2 = matrix(0.53552249401043496273e-03, T, tag)
+ci_h2co2 = matrix(0.93379252815431763174e-07, T, tag)
+ci_gluc = matrix(0.14876174248492728819e-01, T, tag)
+hcbuf = matrix(0.26959905796615793450e-01, T, tag)
+cbuf = matrix(0.40012078673998335843e-01, T, tag)
+vm = matrix(-0.18573662594736270459e+00, T, tag)
+ce_h = matrix(4.59e-8, T, tag)
+ci_h = matrix(4.69e-8, T, tag)
+ae = matrix(0.02000, T, tag)
+chvl = matrix(0.7000e-04, T, tag)
+clvl = matrix(0.1000e-02, T, tag)
+l = matrix(0.1000e-02, T, tag)
+imp = matrix(0.6000e-01, T, tag)
+rm = matrix(0.1250e-02, T, tag)
+am = matrix(0, T, tag)
+phi = matrix(0, 35,tag)
+import math
+cs_hpo4 = 0.00297
+cs_h2po4 = 0.00093
+cm_hpo4 = 0.00297
+cm_h2po4 = 0.00093
+lchm = -(6.8 + math.log10(cm_hpo4 / cm_h2po4))
+lchs =-( 6.8 + math.log10(cs_hpo4 / cs_h2po4))
+cm_h = 10. ** lchm
+cs_h = 10. ** lchs
+print('cm_h ', cm_h )
+print('cs_h ', cs_h )
 ps = 9.00
 vs = 0.00
 
@@ -1370,10 +1423,14 @@ while True:
         break
     else:
         cm_na = 0.14
-        result = scipy.optimize.root(eQs, np.array(guess), 1)
+        # result = scipy.optimize.root(eQs, np.array(guess), method='broyden', 1)
+       # result = scipy.optimize.newton(eQs, np.array(guess), 1)
+       # result = scipy.optimize.broyden1(eQs, np.array(guess), 1)
+        result = scipy.optimize.fsolve(eQs, np.array(guess))
         guess =[var[t] for var in vars]
+        print('guess',guess)
 import numpy as np
-t = np.linspace(t0, tf, T)
+t = np.linspace(t0, tf, T, tag)
 plot_concen = 1
 if plot_concen:
     fig2 = plt.figure(constrained_layout=True)
