@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math
 from scipy import optimize
 from PCT_GLOB_new import *
-# from PCT_GLOB_Flow_dependent_transport import *
+from PCT_GLOB_Flow_dependent_transport import *
 print('f',f)
 
 
@@ -317,22 +317,7 @@ def Buff_Activ_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po
 def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, ebuf_Param,  Buffer_Activation_Param):
     if Buffer_Activation_Param == 1:
         # print('buffer_effect_activate_over_time_for_phosphate', 't=', str(t))
-        # def lch(ca, cb):
-        #
-        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
-        #         return math.log10(ca / cb)
-        #     else:
-        #         return math.log10(abs(ca / cb))
-        #
-        # def ebuf(lc_h, pk, ca, cb, param_ebuf):
-        #     # pH equilibria of four buffer pairs
-        #     if param_ebuf == 0:
-        #         return 0
-        #     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
-        #         return lc_h - pk - math.log10(ca / cb)
-        #
-        #     else:
-        #         return lc_h - pk - math.log10(abs(ca / cb))
+
         # LIS: see label {phosphate}
         q_h_vary = q_h_vary + q_h2_vary
         # LIS: see labela {pH_equilibria}, used as paired equations

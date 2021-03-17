@@ -2,7 +2,7 @@
 # created on fri Jul  5 14:02:47 2019
 
 ps = 9.00
-vs = 0.00
+vs = 0
 rte = 2.57  # rte-gas const. times temp  (Joule/mmol)
 rt = 1.93e+4 # rt-gas const. times temp  (mmhg.ml/mmol)
 f = 0.965e+5  # f-faraday ()
@@ -67,9 +67,9 @@ qiamm = 0.700e-7
 impe = 0
 imps = 0.002
 impm = 0
-cs_na = 0.140
-cs_k = 0.0049
-cs_cl = 0.1132
+# cs_na = 0.140
+# cs_k = 0.0049
+# cs_cl = 0.1132
 cs_hco3 = 0.024
 cs_h2co3 = 0.00000441
 cs_co2 = 0.0015
@@ -84,8 +84,8 @@ cs_gluc = 0.005
 
 
 
-cm_k = 0.0049
-cm_cl = 0.1132
+# cm_k = 0.0049
+# cm_cl = 0.1132
 cm_hco3 = 0.02400
 cm_h2co3 = 0.00000441
 cm_co2 = 0.0015
@@ -173,8 +173,6 @@ sme_gluc = 1.000
 ses_gluc = 0.000
 hme_gluc = 0.8000e-01/m
 hes_gluc = 0.3000e-01
-
-
 
 n_p = 0.3000e-06
 knh4 = 0.1000e+01
@@ -330,8 +328,8 @@ lmi_nagluc = 0.7500e-08
 
 # epithelial model net cotransporters is
 lis_kcl = 0.50e-08
-lis_nahco3 =  0.05000e-07#0.050e-07 #
-lis_na_clhco3 =  3.5e-08  #0.0700e-06 #
+lis_nahco3 =  0.050e-07#0.050e-07 #
+lis_na_clhco3 =  3.50e-08  #0.0700e-06 #
 
 
 # multisegment model net cotransporters mi
@@ -411,9 +409,7 @@ lis_na_clhco3 =  3.5e-08  #0.0700e-06 #
 # # xhp : the potential difference for half maximal flux
 # # lhp : a maximal rate of transport
 # # luminal model lhp = 3.6e-6
-lhp = 0.5e-7
-xihp = 0.4000e+00
-xhp = 0.1450e+01
+
 #
 #
 #

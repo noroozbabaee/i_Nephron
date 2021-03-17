@@ -6,7 +6,7 @@ import scipy
 import matplotlib.pyplot as plt
 import math
 from scipy import optimize
-from PCT_GLOB_new import *
+from PCT_GLOB import *
 
 
 def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi):

@@ -83,8 +83,8 @@ def at_mi_h(cm_h, ci_h, vm, vi, z_h, ami, parama_mi_h):
     if parama_mi_h == 0:
         return 0
     elif gamma < 0:
-        return  -lhp * ami * (1 - 1 / (1 + math.exp(gamma)))
-    return -lhp * ami * (1 / (1 + math.exp(-gamma)))
+        return -lhp * ami * (1 - 1 / (1 + np.exp(gamma)))
+    return -lhp * ami * (1 / (1 + np.exp(-gamma)))
 
 
 # goldman fluxes (passive fluxes) describes the ionic flux across a cell membrane
@@ -100,9 +100,9 @@ def goldman(hab, a, z, va, vb, ca, cb, param_goldman):
     elif zab == 0 or va == vb and ca > 0 and cb > 0:
         return hab * a * (ca - cb)
     elif zab > 0:
-        return hab * a * zab * (ca - cb * math.exp(-zab)) / (1 - math.exp(-zab))
+        return hab * a * zab * (ca - cb * np.exp(-zab)) / (1 - np.exp(-zab))
     else:
-        return hab * a * zab * (ca * math.exp(zab) - cb) / (math.exp(zab) - 1)
+        return hab * a * zab * (ca * np.exp(zab) - cb) / (np.exp(zab) - 1)
 
 
 # Convective Solute Fluxes
@@ -114,8 +114,8 @@ def CSF(ca, cb, flux, s, param_CSF):
     def lmmsc(ca, cb):
 
         import math
-        if ca > 0 and cb > 0 and ca - cb != 0 and cb != 0 and math.log10(ca / cb) != 0:
-            return (ca - cb) / (math.log10(ca / cb))
+        if ca > 0 and cb > 0 and ca - cb != 0 and cb != 0 and np.log10(ca / cb) != 0:
+            return (ca - cb) / (np.log10(ca / cb))
         else:
             return cb
 
@@ -124,9 +124,9 @@ def CSF(ca, cb, flux, s, param_CSF):
 def lch(ca, cb):
     import math
     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
-        return math.log10(ca / cb)
+        return np.log10(ca / cb)
     else:
-        return math.log10(abs(ca / cb))
+        return np.log10(abs(ca / cb))
 
 
 def matrix(init, h, tag):
@@ -143,11 +143,11 @@ def f_eps(c, z, v):
     # electrochemical potential of species
     # see label {Electrochemical_P}
     if c > 0 and c != 0:
-        return rte * math.log(c) + z * f * v * 1.e-6
+        return rte * np.log(c) + z * f * v * 1.e-6
     else:
         print('uy')
 
-        return rte * math.log(abs(c)) + z * f * v * 1.e-6
+        return rte * np.log(abs(c)) + z * f * v * 1.e-6
 
 
 def nahco3_is(ci_na, cs_na, ci_hco3, cs_hco3, z_na, z_hco3, vi, vs, ais, lis_nahco3, param_nahco3_is):
@@ -278,10 +278,10 @@ def ebuf(lch, pk, ca, cb, param_ebuf):
     if param_ebuf == 0:
         return 0
     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
-        return lch - pk - math.log10(ca / cb)
+        return lch - pk - np.log10(ca / cb)
 
     else:
-        return lch - pk - math.log10(abs(ca / cb))
+        return lch - pk - np.log10(abs(ca / cb))
 
 
 # common definition
@@ -541,7 +541,7 @@ def Buff_Activ(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_cell, 
            q_h_vary = q_h_vary + q_h2_vary - 1.e6 * qiamm
            q_h2_vary = lc_h - pk - lch(c_h_vary ,c_h2_vary)
 
-           #q_h2_vary = lc_h - pk - math.log10(c_h_vary / c_h2_vary)
+           #q_h2_vary = lc_h - pk - np.log10(c_h_vary / c_h2_vary)
         else:
            q_h_vary = q_h_vary + q_h2_vary
            # print('c_h_vary', c_h_vary)
@@ -598,7 +598,8 @@ def eQs(guess):
     # LOG Conc. of Hydrogen Interspace
     lche = pkc + lch(ce_hco3 [ t ], ce_h2co3 [ t ])
     ce_h [ t ] = 10 ** (-lche)
-
+    # lche = pkp + lch(ce_hpo4 [ t ], ce_h2po4 [ t ])
+    # ce_h [ t ] = 10 ** (-lche)
     # ELECTROLYTE TRANSPORT ACROSS A SIMPLE EPITHELIUM of the rat proximal tubule (1992)
     # The cell volume is presented as a function of the inverse cell impermeant species concentration
     clvl [ t ] = clvl0 * imp0 / imp [ t ]
@@ -610,10 +611,11 @@ def eQs(guess):
     p_i = pm
 
     # LOG Conc. of Hydrogen Cell
-    lchi = pkc + lch(ci_hco3 [ t ], ci_h2co3 [ t ])
+    lchi = pkc + lch(ci_hco3[ t ], ci_h2co3 [ t ])
     ci_h [ t ] = 10 ** (-lchi)
     # LOG Conc. of Hydrogen Cell
-
+    # lchi = pkp + lch(ci_hpo4 [ t ], ci_h2po4 [ t ])
+    # ci_h [ t ] = 10 ** (-lchi)
 
     # lchi = pkp + lch(ci_hpo4 [ t ], ci_h2po4 [ t ])
     # ci_h [ t ] = 10 ** (-lchi)
@@ -906,152 +908,48 @@ def eQs(guess):
     # in electrochemical driving forces
     # Updating flux equations with electodiffusive fluxes (transporters).
     # Electodiffusive fluxes  are proportional to the differences in electrochemical driving forces
-    T_window = 15
+    T_window = 45
     Transporters_progressive_activation_alongtime = 1
+
     sglt_mi_param, nah2po4_mi_param, clhco3_mi_param, clhco2_mi_param, nahco3_is_param, nahco3_ie_param, \
     kcl_is_param, kcl_ie_param, na_clhco3_is_param, na_clhco3_ie_param, nah_param, nak_atp_param, h_mi_atp_param = \
         Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window)
+
     #print('Transp_Progres_Activ', Transp_Progres_Activ(Transporters_progressive_activation_alongtime, t, T, T_window))
-    # if Transporters_progressive_activation_alongtime == 1:
-    #     sglt_mi_param = 0
+    # sglt_mi_param = 0
     #     nah2po4_mi_param = 0
     #     clhco3_mi_param = 0
     #     clhco2_mi_param = 0
-    #     nahco3_is_param = 0
-    #     nahco3_ie_param = 0
-    #     kcl_is_param = 0
-    #     kcl_ie_param = 0
-    #     na_clhco3_is_param = 0
-    #     na_clhco3_ie_param = 0
     #     nah_param = 0
-    #     nak_atp_param = 0
-    #     h_mi_atp_param = 0
-    #     Time_Durtn = int(T / T_window)
-    #     n = 0 #int(2 * Time_Durtn)
-    #     if n < t < n + Time_Durtn:
-    #         print('No Transporter Yet at Time_Durtn' if t == Time_Durtn else '')
-    #     elif n + Time_Durtn <= t < n + 2 * Time_Durtn :
-    #         sglt_mi_param = 1
-    #         print('sglt_mi_param_activation at time =' + str(Time_Durtn) if t == n + 2 * Time_Durtn else '')
-    #     elif n + 2 * Time_Durtn <= t< n + 3* Time_Durtn :
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #     elif n + 3 * Time_Durtn <= t < n + 4 * Time_Durtn:
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #     elif n +4 * Time_Durtn <= t < n + 5 * Time_Durtn :
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #     elif n + 5 * Time_Durtn <= t< n + 6 * Time_Durtn :
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #     elif n + 6 * Time_Durtn <= t< n + 7 * Time_Durtn:
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #         kcl_is_param = 1
-    #         kcl_ie_param = 1
-    #     elif n + 7 * Time_Durtn <= t < n + 8 * Time_Durtn:
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #         kcl_is_param = 1
-    #         kcl_ie_param = 1
-    #         na_clhco3_is_param = 1
-    #         na_clhco3_ie_param = 1
-    #     elif n + 8 * Time_Durtn <= t < n + 9 * Time_Durtn:
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #         kcl_is_param = 1
-    #         kcl_ie_param = 1
-    #         na_clhco3_is_param = 1
-    #         na_clhco3_ie_param = 1
-    #         nah_param = 1
-    #     elif n + 9 * Time_Durtn <= t < n + 10 * Time_Durtn :
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #         kcl_is_param = 1
-    #         kcl_ie_param = 1
-    #         na_clhco3_is_param = 1
-    #         na_clhco3_ie_param = 1
-    #         nah_param = 1
-    #         nak_atp_param = 1
-    #     else:
-    #         sglt_mi_param = 1
-    #         nah2po4_mi_param = 1
-    #         clhco3_mi_param = 1
-    #         clhco2_mi_param = 1
-    #         nahco3_is_param = 1
-    #         nahco3_ie_param = 1
-    #         kcl_is_param = 1
-    #         kcl_ie_param = 1
-    #         na_clhco3_is_param = 1
-    #         na_clhco3_ie_param = 1
-    #         nah_param = 1
-    #         nak_atp_param = 1
-    #         h_mi_atp_param = 1
 
     # net transporters on mi bourder
-    #sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi)
+    # lmi_nagluc=0
     sglt = sglt_mi(cm_na, ci_na[t], cm_gluc, ci_gluc[t], z_na, z_gluc, vm[t], vi[t], ami, lmi_nagluc,
                    sglt_mi_param)
     na_mi_nagluc = sglt[0]
     gluc_mi_nagluc = sglt[1]
 
-   # nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi_nah2po4, param_nah2po4_mi
+    # lmi_nah2po4 = 0
     nah2po4 = nah2po4_mi(cm_na, ci_na[t], cm_h2po4, ci_h2po4[t], z_na, z_h2po4, vm[t], vi[t], ami,
                          lmi_nah2po4, nah2po4_mi_param)
     na_mi_nah2po4 = nah2po4[0]
     h2po4_mi_nah2po4 = nah2po4[1]
 
-    clhco3 = clhco3_mi(cm_cl, ci_cl[t], cm_hco3, ci_hco3[t], z_cl, z_hco3, vm[t], vi[t], ami,
-                       lmi_clhco3, clhco3_mi_param)
+    # lmi_clhco3 = 0
+    clhco3 = clhco3_mi(cm_cl, ci_cl[t], cm_hco3, ci_hco3[t], z_cl, z_hco3, vm[t], vi[t], ami,lmi_clhco3
+                       , clhco3_mi_param)
     cl_mi_clhco3 = clhco3[0]
     hco3_mi_clhco3 = clhco3[1]
-
+    # lmi_clhco2 = 0
     clhco2 = clhco2_mi(cm_cl, ci_cl[t], cm_hco2, ci_hco2[t], z_cl, z_hco2, vm[t], vi[t], ami,
                        lmi_clhco2, clhco2_mi_param)
     cl_mi_clhco2 = clhco2[0]
     hco2_mi_clhco2 = clhco2[1]
 
-    # net cotransporters on is bourder
-    nahco3 = nahco3_is(ci_na[t], cs_na, ci_hco3[t], cs_hco3, z_na, z_hco3, vi[t], vs, ais,
-                       lis_nahco3, nahco3_is_param)
-    na_is_nahco3 = nahco3[0]
-    hco3_is_nahco3 = nahco3[1]
 
-    kcl_ais = kcl(ci_k[t], cs_k, ci_cl[t], cs_cl, z_k, z_cl, vi[t], vs, ais, lis_kcl, kcl_is_param)
-    k_is_kcl = kcl_ais[0]
-    cl_is_kcl = kcl_ais[1]
 
-    na_clhco3 = na_clhco3_is(ci_na[t], cs_na, ci_cl[t], cs_cl, ci_hco3[t], cs_hco3, z_na, z_cl, z_hco3,
-                             vi[t], vs, ais, lis_na_clhco3, na_clhco3_is_param)
-    na_is_na_clhco3 = na_clhco3[0]
-    cl_is_na_clhco3 = na_clhco3[ 1]
-    hco3_is_na_clhco3 = na_clhco3[2]
-
-    # the nah exchanger translate concentrations to the nah model on  mi bourder
+    # the nah exchanger translate concentrations to the nah model on  mi bourdernah_param
+    # nah_param = 0
     mynah = nah(ci_h[t], ci_na[t], ci_nh4[t], cm_h, cm_na, cm_nh4, nah_param)
     jnah_na = mynah[0]
     jnah_h = mynah[1]
@@ -1068,12 +966,28 @@ def eQs(guess):
     fikm_gluc = fikm_gluc + gluc_mi_nagluc
     fikm_h = fikm_h + jnhe3_h
     fikm_nh4 = fikm_nh4 + jnhe3_nh4
+    # lis_nahco3 = 0
+    # net cotransporters on is bourder
+    nahco3 = nahco3_is(ci_na [ t ], cs_na, ci_hco3 [ t ], cs_hco3, z_na, z_hco3, vi [ t ], vs, ais,
+                       lis_nahco3, nahco3_is_param)
+    na_is_nahco3 = nahco3 [ 0 ]
+    hco3_is_nahco3 = nahco3 [ 1 ]
+    # lis_kcl = 0
+    kcl_ais = kcl(ci_k [ t ], cs_k, ci_cl [ t ], cs_cl, z_k, z_cl, vi [ t ], vs, ais, lis_kcl, kcl_is_param)
+    k_is_kcl = kcl_ais [ 0 ]
+    cl_is_kcl = kcl_ais [ 1 ]
+    lis_na_clhco3 = 0
+    na_clhco3 = na_clhco3_is(ci_na [ t ], cs_na, ci_cl [ t ], cs_cl, ci_hco3 [ t ], cs_hco3, z_na, z_cl, z_hco3,
+                             vi [ t ], vs, ais, lis_na_clhco3, na_clhco3_is_param)
+    na_is_na_clhco3 = na_clhco3 [ 0 ]
+    cl_is_na_clhco3 = na_clhco3 [ 1 ]
+    hco3_is_na_clhco3 = na_clhco3 [ 2 ]
 
     fiks_na = fiks_na + na_is_nahco3 + na_is_na_clhco3
     fiks_k = fiks_k + k_is_kcl
     fiks_cl = fiks_cl + cl_is_kcl + cl_is_na_clhco3
     fiks_hco3 = fiks_hco3 + hco3_is_na_clhco3 + hco3_is_nahco3
-
+    # lis_nahco3
     nahco3_aie = nahco3_is(ci_na[t], ce_na[t], ci_hco3[t], ce_hco3[t], z_na, z_hco3, vi[t], ve[t],
                            aie,
                            lis_nahco3, nahco3_is_param)
@@ -1096,17 +1010,20 @@ def eQs(guess):
     jk_cl = jk_cl + cl_aie_kcl + cl_aie_na_clhco3
     jk_hco3 = jk_hco3 + hco3_aie_na_clhco3 + hco3_aie_nahco3
 
-    # sodium pumps on mi bourder
+    # sodium pumps on is bourder
+     # nak_atp_param = 0
     nak = nak_atp(ci_na[t], ce_na[t], ci_k[t],  ce_k[t], ce_nh4[t], nak_atp_param)
     atie_na = nak[0]
     atie_k = nak[1]
     atie_nh4 = nak[2]
     # proton pumps
+    # h_mi_atp_param = 0
     atmi_h = at_mi_h(cm_h, ci_h[t], vm[t], vi[t], z_h, ami,  h_mi_atp_param)
 
     jk_na = jk_na + aie * atie_na
     jk_k = jk_k + aie * atie_k
     jk_nh4 = jk_nh4 + aie * atie_nh4
+
     nak = nak_atp(ci_na [ t ], cs_na, ci_k [ t ], cs_k , cs_nh4, nak_atp_param)
     atis_na = nak [ 0 ]
     atis_k = nak [ 1 ]
@@ -1216,15 +1133,15 @@ def eQs(guess):
     phii_vlm =phi_scale(phii_vlm, scale)
     qi_na =phi_scale(qi_na, scale)
     qi_k =phi_scale(qi_k, scale)
-    qi_cl =phi_scale(qi_cl, scale)
-    qi_hco3 =phi_scale(qi_hco3, scale)
-    qi_h2co3 =phi_scale(qi_h2co3, scale)
-    qi_co2 =phi_scale(qi_co2, scale)
-    qi_hpo4 =phi_scale(qi_hpo4, scale)
-    qi_h2po4 =phi_scale(qi_h2po4, scale)
-    qi_urea =phi_scale(qi_urea, scale)
-    qi_nh3 =phi_scale(qi_nh3, scale)
-    qi_nh4 =phi_scale(qi_nh4, scale)
+    qi_cl = phi_scale(qi_cl, scale)
+    qi_hco3 = phi_scale(qi_hco3, scale)
+    qi_h2co3 = phi_scale(qi_h2co3, scale)
+    qi_co2 =  phi_scale(qi_co2, scale)
+    qi_hpo4 = phi_scale(qi_hpo4, scale)
+    qi_h2po4 = phi_scale(qi_h2po4, scale)
+    qi_urea = phi_scale(qi_urea, scale)
+    qi_nh3 = phi_scale(qi_nh3, scale)
+    qi_nh4 = phi_scale(qi_nh4, scale)
     qi_h =phi_scale(qi_h, scale)
     qi_hco2 = phi_scale(qi_hco2, scale)
     qi_h2co2 = phi_scale(qi_h2co2, scale)
@@ -1268,7 +1185,7 @@ def eQs(guess):
     # dihydrogen_ammonium_param_i = 1
     # dihydroxymethylidene_param_e = 1
     # dihydroxymethylidene_param_i = 1
-    n = 0
+    n = 3
     print('buffer', BuffPairs_Progres_Activ(BuffPairs_progressive_activation_alongtime, t, T, T_window, n))
     Buffer_Co2_LIS_Param, Buffer_Co2_Cell_Param, Buffer_HPO4_LIS_Param, \
     Buffer_HPO4_CELL_Param, Buffer_NH3_LIS_Param, \
@@ -1305,12 +1222,17 @@ def eQs(guess):
     # cell buffer content and ph equilibrium
     qi_cb = cbuf[t] + hcbuf[t] - (tbuf * clvl0 / clvl[t])
     phi[32] = qi_cb
-    c_eQ_h2po4 = math.log10((
-       (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t])))
-        # if ci_h2po4[t] * cbuf[t] == 0 or (
-        #     (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]) <= 0) else math.log10(
-        # (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))
+    c_eQ_h2po4 = np.log10(abs(
+       (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))) if ci_h2po4[t] * cbuf[t] == 0 or (
+             (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]) <= 0) else np.log10(
+            (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))
     phi_ph_eQ = pkb - pkp - c_eQ_h2po4
+    # c_eQ_h2co3 = np.log10(abs(
+    #     (ci_hco3 [ t ] * hcbuf [ t ]) / (ci_h2co3 [ t ] * cbuf [ t ]))) if ci_h2co3 [ t ] * cbuf [ t ] == 0 or (
+    #         (ci_hco3 [ t ] * hcbuf [ t ]) / (ci_h2co3 [ t ] * cbuf [ t ]) <= 0) else np.log10(
+    #     (ci_hco3 [ t ] * hcbuf [ t ]) / (ci_h2co3 [ t ] * cbuf [ t ]))
+    # phi_ph_eQ = pkb - pkp - c_eQ_h2co3
+
     phi[33] = phi_ph_eQ
     # co2, formate, phosphate, and ammonia content:
     phi [ 5 ], phi [ 6 ], phi [ 7 ] = Buff_Activ_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
@@ -1358,15 +1280,17 @@ def eQs(guess):
 # # sol(12)='  h  '
 # # sol(13)=' hco2'
 # # sol(14)='h2co2'
-# # sol(15)=' gluc'
+# # sol(15)=' gluc':wq
+
 Nfac = 10
 t0 = 0
-tf = 500
+tf = 300
 T = int(tf * Nfac)
 dt = float(tf - t0) / float(T)
 tag = 'clever'
 #print('dt', dt)
 rtau = 1/dt
+
 ve = matrix(-0.89432938258185330771e-02, T, tag)
 pe = matrix(-0.23093764341580683919e+02, T, tag)
 ce_na = matrix(0.14040045563695688347e+00, T, tag)
@@ -1384,7 +1308,7 @@ ce_hco2 = matrix(0.77584319325420768570e-03, T, tag)
 ce_h2co2 = matrix(0.20531685246992843752e-06, T, tag)
 ce_gluc = matrix(0.77236905064622532815e-02, T, tag)
 vi = matrix(-0.54945785940474827669e+02, T, tag)
-p_i = matrix(0.66971984470614129292e-01, T, tag)
+p_i = matrix(0.0e-01, T, tag)
 ci_na = matrix(0.20443615264909884011e-01, T, tag)
 ci_k = matrix(0.13742335290954643678e+00, T, tag)
 ci_cl = matrix(0.16901004032978079322e-01, T, tag)
@@ -1412,21 +1336,20 @@ imp = matrix(0.6000e-01, T, tag)
 rm = matrix(0.1250e-02, T, tag)
 am = matrix(0, T, tag)
 phi = matrix(0, 35, tag)
-# lchm = pkc + math.log10(cm_hco3 / cm_h2co3)
-# lchs = pkc + math.log10(cs_hco3 / cs_h2co3)
+# lchm = pkc + np.log10(cm_hco3 / cm_h2co3)
+# lchs = pkc + np.log10(cs_hco3 / cs_h2co3)
 # cm_h = 10. ** (-lchm)
 # cs_h = 10. ** (-lchs)
 
-lchm = pkp + math.log10(cm_hpo4 / cm_h2po4)
-lchs = pkp + math.log10(cs_hpo4 / cs_h2po4)
+lchm = pkp + np.log10(cm_hpo4 / cm_h2po4)
+lchs = pkp + np.log10(cs_hpo4 / cs_h2po4)
 cm_h = 10. ** (-lchm)
 cs_h = 10. ** (-lchs)
 # cm_h = 4.95e-8
 # cs_h = 4.95e-8
 # print('cs_h',cs_h)
 # print('cm_h',cm_h)
-ps = 9.00
-vs = 0.00
+
 
 
 vars = [ve, pe, ce_na, ce_k,ce_cl, ce_hco3, ce_h2co3, ce_co2, ce_hpo4, ce_h2po4, ce_urea, ce_nh3, ce_nh4, ce_hco2,
@@ -1446,6 +1369,11 @@ while True:
         break
     else:
         cm_na = 0.14
+        cm_k = 0.0049
+        cm_cl = 0.1132
+        cs_na = 0.140
+        cs_k = 0.0049
+        cs_cl = 0.1132
         # result = scipy.optimize.root(eQs, np.array(guess), method='broyden', 1)
        # result = scipy.optimize.newton(eQs, np.array(guess), 1)
        # result = scipy.optimize.broyden1(eQs, np.array(guess), 1)
