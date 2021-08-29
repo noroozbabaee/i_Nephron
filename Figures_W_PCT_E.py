@@ -9,16 +9,16 @@ from matplotlib.pyplot import figure
 import math
 import pickle
 
-Figure_4 = 1
-Figure_5 = 1
-Figure_7 = 1
-Figure_9_10 = 1
+Figure_4 = 0
+Figure_5 = 0
+Figure_7 = 0
+Figure_9_10 = 0
 # To produce Figures 6A, 6B, 8A and 8B, we use Altair which is an open-source python library.
-# We can create just one figure using Altair.
-Figure_6A = 1
+# We can create just one figure at the time (via Altair); each time we call altair, it opens a new windows browser.
+Figure_6A = 0
 Figure_6B = 0
 Figure_8A = 0
-Figure_8B = 0
+Figure_8B = 1
 
 if Figure_4:
     f = open('Data_Figure_4a.py', 'rb')
@@ -346,15 +346,15 @@ if Figure_8A:
 
     alt.renderers.enable('altair_viewer')
     chart = alt.Chart(df).mark_bar().encode(
-        alt.X('c2', title=None, sort=[ "Na", "K", "Cl", "Gluc" ]),
+        alt.X('c2', title=None, sort=[ "Na", "K", "Cl", "Gluc"]),
         alt.Y('sum(values)',
               axis=alt.Axis(
                   grid=False,
                   title=None)),
-        alt.Column('c1', title=None, sort=[ "Original Setup", "NHE3 = 0", "SGLT = 0", "NaH2PO4 = 0" ]),
+        alt.Column('c1', title=None, sort=[ "Original Setup", "NHE3 = 0", "SGLT = 0", "NaH2PO4 = 0"]),
         alt.Color('Fluxes',
                   scale=alt.Scale(
-                       range=[ 'black', '#D55E00', '#F0E442', '#007282', '#2B9F78' ]
+                       range=[ 'black', '#D55E00', '#F0E442', '#007282', '#2B9F78']
                     ),
                   )) \
         .configure_view(
@@ -370,13 +370,13 @@ if Figure_8B:
 
     f.close()
     print('my_loaded_list1', my_loaded_list1)
-    Na = np.array(my_loaded_list1 [ 'Na' ])
-    K = np.array(my_loaded_list1 [ 'K' ])
-    Cl = np.array(my_loaded_list1 [ 'Cl' ])
-    Gluc = np.array(my_loaded_list1 [ 'Gluc' ])
+    Na = np.array(my_loaded_list1 ['Na'])
+    K = np.array(my_loaded_list1 [ 'K'])
+    Cl = np.array(my_loaded_list1 [ 'Cl'])
+    Gluc = np.array(my_loaded_list1 ['Gluc'])
 
     df = pd.DataFrame({
-        'index': [ "A Original Setup", "B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0" ],
+        'index': [ "A Original Setup", "B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
         'Na': Na,
         'K': K,
         'Cl': Cl,
@@ -389,7 +389,7 @@ if Figure_8B:
         column='index:N'
     ).configure_view(
     ).encode(
-        color=alt.Color('variable:N', scale=alt.Scale(range=[ 'black', '#D55E00', '#007282', '#2B9F78' ]))
+        color=alt.Color('variable:N', scale=alt.Scale(range=[ 'black', '#D55E00', '#007282', '#2B9F78']))
     )
     chart.show()
-    
+
