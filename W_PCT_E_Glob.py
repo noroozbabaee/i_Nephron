@@ -114,7 +114,6 @@ if if2007:
     lmi_nagluc = 0.7500e-08
     lmi_nah = 0.225e-7
     lmi_nanh4 = 0.15e-8
-
     lis_kcl = 0.50e-08
     lis_nahco3 =  0.050e-07
     lis_na_clhco3 =  3.50e-08  #0.0700e-06 #
