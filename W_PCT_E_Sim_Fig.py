@@ -45,19 +45,20 @@ H is the hatch used for identification of the different dataframe"""
     axe.set_title(title)
 
     # Add invisible data to add another legend
-    n=[]
+    n= []
     for i in range(n_df):
         n.append(axe.bar(0, 0, color="gray", hatch=H * i))
 
-    l1 = axe.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
+    l1 = axe.legend(h[:n_col], l[:n_col], loc= [1.01, 0.5])
     if labels is not None:
-        l2 = plt.legend(n, labels, loc=[1.01, 0.1])
+        l2 = plt.legend(n, labels, loc= [1.01, 0.1])
     axe.add_artist(l1)
     return axe
 
 
 def Extract(lst):
-    return [ item[-1] for item in lst ]
+    return[item[-1] for item in lst]
+
 
 def csf(ca, cb, flux, s, param_csf):
     # Convective Solute Fluxes, see Eqs: (37, 38)
@@ -65,7 +66,6 @@ def csf(ca, cb, flux, s, param_csf):
         return 0
 
     def lmmsc(ca, cb):
-        # Definition of the logarithmic mean membrane solute concentration
         if ca > 0 and cb > 0 and ca - cb != 0 and cb != 0 and np.log10(ca / cb) != 0:
             return (ca - cb) / (np.log10(ca / cb))
         else:
@@ -73,24 +73,11 @@ def csf(ca, cb, flux, s, param_csf):
     return flux * (1.00 - s) * lmmsc(ca, cb)
 
 
-def AAPC(ca, cb, z, a, hab, va, vb, param_AAPC):
-    # AREA    ADJUSTED    PARTIAL    CONDUCTANCE,  see Eqs: (39), (41)
-    zab = (z * (va - vb)*f * 1.e-6) / rte
-    if param_AAPC == 0:
-        return 0
-    elif zab == 0 or va == vb and ca > 0 and cb > 0:
-        return hab * a * (ca - cb)
-    elif zab > 0:
-        return hab * a * zab * (ca - cb * math.exp(-zab)) / (1 - math.exp(-zab))
-    else:
-        return hab * a * zab * (ca * math.exp(zab) - cb) / (math.exp(zab) - 1)
-
-
 def goldman(hab, a, z, va, vb, ca, cb, param_goldman):
     # see  Eqs: (39), (41)
     zab = (z * f * (va - vb) * 1.e-6) / rte
     if param_goldman == 0:
-        return [ 0 ]
+        return[0]
     elif zab == 0 or va == vb and ca > 0 and cb > 0:
         return hab * a * (ca - cb)
     elif zab > 0:
@@ -100,8 +87,6 @@ def goldman(hab, a, z, va, vb, ca, cb, param_goldman):
 
 
 def k_cl(ca_k, cb_k, ca_cl, cb_cl, z_k, z_cl, va, vb, a, l_kcl, param_kcl):
-    # k-cl simple cotransporter with 1:1 stoichiometry, located on Peritubular Membrane which
-    # includes both Cell-Lateral Membrane (ie) /Cell-Basal (is) Membrane.
     # see Eq: (42)
     if param_kcl == 0:
         return[0, 0]
@@ -112,20 +97,11 @@ def k_cl(ca_k, cb_k, ca_cl, cb_cl, z_k, z_cl, va, vb, a, l_kcl, param_kcl):
         xb_cl = f_eps(cb_cl, z_cl, vb)
         k_kcl = l_kcl * a * (xa_k - xb_k + xa_cl - xb_cl)
         cl_kcl = l_kcl * a * (xa_k - xb_k + xa_cl - xb_cl)
-    return [k_kcl, cl_kcl]
+    return[k_kcl, cl_kcl]
 
 
 def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_nagluc, param_sglt_mi):
-    # Na-glucose simple cotransporter with 1:1 stoichiometry, located on  Apical  Membrane
-    # return is the transported flux for each solute due to the existance of Na-glucose simple cotransporter.
-    # f_eps(): Modular function to calculate the electrochemical potential of species:(RT)*ln(c) + z*f*V
-    # see Eq: (43)
-    # checking the unit consistency for Electrodiffusive_flux Equation:
-    # [mV] = 1.e-3[V]----> [mV] = 1.e-3 [Joule/Coul]
-    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mol][mV]
-    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mol]*1.e-3 [ Joule / Coul ]
-    # [xm]---->[Joule/mmol] = [Joule/mmol][1] + [1][Coul/mmol]* 1.e-6 [ Joule / Coul ]
-    # [Electrodiffusive_flux] ----> [mmol/s] = [mmol2/Joule.s]*[Joule/mmol]
+    #  Eq: (43)
     if param_sglt_mi == 0:
         return[0, 0]
     else:
@@ -139,8 +115,7 @@ def sglt_mi(cm_na, ci_na, cm_gluc, ci_gluc, z_na, z_gluc, vm, vi, ami, lmi_naglu
 
 
 def nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi_nah2po4, param_nah2po4_mi):
-    # Na-h2po4 simple cotransporter with 1:1 stoichiometry, located on  Apical  Membrane
-    # see Eq: (44)
+    #  Eq: (44)
     if param_nah2po4_mi == 0:
         return[0, 0]
     else:
@@ -154,9 +129,6 @@ def nah2po4_mi(cm_na, ci_na, cm_h2po4, ci_h2po4, z_na, z_h2po4, vm, vi, ami, lmi
 
 
 def nah(cm_na, ci_na, cm_h, ci_h, z_na, z_h, vm, vi, ami, lmi_nah, param_nah_mi):
-    # Weintein introduced two simple exchangers  na/h and na/nh4 in their work mentioned above and
-    # it seems these two simple exchangers are equivalent to NHE transporter that they introduced in 1995.
-    # They located on Apical membrane.
     # Eq: (45)
     if param_nah_mi == 0:
         return[0, 0]
@@ -171,9 +143,6 @@ def nah(cm_na, ci_na, cm_h, ci_h, z_na, z_h, vm, vi, ami, lmi_nah, param_nah_mi)
 
 
 def nanh4(cm_na, ci_na, cm_nh4, ci_nh4 ,z_na, z_nh4, vm, vi, ami, lmi_nanh4, param_nanh4_mi):
-    # Weintein introduced two simple exchangers  na/h and na/nh4 in their work mentioned above and
-    # it seems these two simple exchangers are equivalent to NHE transporter that they introduced in 1995.
-    # They located on Apical membrane.
     # Eq: (46)
     if param_nanh4_mi == 0:
         return[0, 0]
@@ -188,10 +157,9 @@ def nanh4(cm_na, ci_na, cm_nh4, ci_nh4 ,z_na, z_nh4, vm, vi, ami, lmi_nanh4, par
 
 
 def clhco2_mi(cm_cl, ci_cl, cm_hco2, ci_hco2, z_cl, z_hco2, vm, vi, ami, lmi_clhco2, param_clhco2_mi):
-    # cl/hco2 simple exchanger with 1:-1 stoichiometry, located on Apical  Membrane.
     # Eq: (47)
     if param_clhco2_mi == 0:
-        return [ 0, 0 ]
+        return[0, 0]
     else:
         xm_cl = f_eps(cm_cl, z_cl, vm)
         xm_hco2 = f_eps(cm_hco2, z_hco2, vm)
@@ -199,14 +167,13 @@ def clhco2_mi(cm_cl, ci_cl, cm_hco2, ci_hco2, z_cl, z_hco2, vm, vi, ami, lmi_clh
         xi_hco2 = f_eps(ci_hco2, z_hco2, vi)
         cl_mi_clhco2 = lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
         hco2_mi_clhco2 = - lmi_clhco2 * ami * (xm_cl - xi_cl - xm_hco2 + xi_hco2)
-        return [ cl_mi_clhco2, hco2_mi_clhco2 ]
+        return[cl_mi_clhco2, hco2_mi_clhco2]
 
 
 def clhco3_mi(cm_cl, ci_cl, cm_hco3, ci_hco3, z_cl, z_hco3, vm, vi, ami, lmi_clhco3, param_clhco3_mi):
-    # cl/hco3 simple exchanger with 1:-1 stoichiometry, located on Apical  Membrane.
     # See Eq: (48)
     if param_clhco3_mi == 0:
-        return [ 0, 0 ]
+        return[0, 0]
     else:
         xm_cl = f_eps(cm_cl, z_cl, vm)
         xm_hco3 = f_eps(cm_hco3, z_hco3, vm)
@@ -214,20 +181,20 @@ def clhco3_mi(cm_cl, ci_cl, cm_hco3, ci_hco3, z_cl, z_hco3, vm, vi, ami, lmi_clh
         xi_hco3 = f_eps(ci_hco3, z_hco3, vi)
         cl_mi_clhco3 = lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
         hco3_mi_clhco3 = - lmi_clhco3 * ami * (xm_cl - xi_cl - xm_hco3 + xi_hco3)
-    return [ cl_mi_clhco3, hco3_mi_clhco3 ]
+    return[cl_mi_clhco3, hco3_mi_clhco3]
 
 
 def na_hco3(ci_na, cs_na, ci_hco3, cs_hco3, z_na, z_hco3, vi, vs, ais, lis_nahco3, param_na_hco3):
     # See Eq: (49)
     if param_na_hco3 == 0:
-        return[0, 0]
+        return [ 0, 0]
     else:
         xi_na = f_eps(ci_na, z_na, vi)
         xi_hco3 = f_eps(ci_hco3, z_hco3, vi)
         xs_na = f_eps(cs_na, z_na, vs)
         xs_hco3 = f_eps(cs_hco3, z_hco3, vs)
         na_is_nahco3 = lis_nahco3 * ais * (xi_na - xs_na + 3 * (xi_hco3 - xs_hco3))
-        hco3_is_nahco3 = 3 * lis_nahco3 * ais * (xi_na - xs_na + 3 * (xi_hco3 - xs_hco3))
+        hco3_is_nahco3 =  3 * lis_nahco3 * ais * (xi_na - xs_na + 3 * (xi_hco3 - xs_hco3))
         return[na_is_nahco3, hco3_is_nahco3]
 
 
@@ -250,11 +217,6 @@ def na_cl_hco3(ci_na, cs_na, ci_cl, cs_cl, ci_hco3, cs_hco3, z_na, z_cl, z_hco3,
 
 
 def h_atp_mi(cm_h, ci_h, vm, vi, z_h, ami, parama_mi_h):
-    # Proton pumps area special kind  of transporter  that push
-    # hydrogen ions  from areas of low concentration
-    # with high concentration. Ions moving down a gradient release energy,
-    # but when they move up a gradient, it takes energy.Diffusion can then use this
-    # gradient to capture energy again, as the ions move downhill.
     # See Eq: (53)
     xm_h = f_eps(cm_h, z_h, vm)
     xi_h = f_eps(ci_h, z_h, vi)
@@ -266,25 +228,16 @@ def h_atp_mi(cm_h, ci_h, vm, vi, z_h, ami, parama_mi_h):
     return -lhp * ami * (1 / (1 + np.exp(-gamma)))
 
 
-def nak_atp( ci_na, ce_na,ci_k,  ce_k, ce_nh4, param_nak_atp):
-    # Powered by ATP, the pump moves
-    # sodium and potassium  ions in opposite
-    # directions, each against its concentration
-    # gradient.In  a single cycle of the pump, three sodium ions are
-    # extruded from and two  potassium ions are imported into  the cell.
+def nak_atp(ci_na, ce_na, ci_k,  ce_k, ce_nh4, param_nak_atp):
     # See Eqs: (54, 55, 56, 57, 58)
     if param_nak_atp == 0:
         return[0, 0, 0]
     else:
-        # sodium affinity
         knpn = 0.0002 * (1.0 + ci_k / .00833)
-        # knh4 = 0.0001 * (1.0 + ce_na / .0185)
         knpk = 0.0001 * (1.0 + ce_na / .0185)
-        # atpase transporter flux in is membrane
         a = (ci_na / (knpn + ci_na)) ** 3
         b = ((ce_k + ce_nh4) / (knpk + ce_k + ce_nh4)) ** 2
         atp_na = n_p * a * b
-        # alloW for competition betWeen k+ and nh4+
         atp_k = -atp_na * (2/3) * ce_k / (ce_k + ce_nh4 / knh4)
         atp_nh4 = -atp_na * (2/3) * ce_nh4 / (knh4 * ce_k + ce_nh4)
         return[atp_na, atp_k, atp_nh4]
@@ -296,8 +249,8 @@ def lch(ca, cb):
     else:
         return np.log10(abs(ca / cb))
 
+
 def f_eps(c, z, v):
-    # electrochemical potential of species
     # see Eq: (52)
     if c > 0 and c != 0:
         return rte * np.log(c) + z * f * v * 1.e-6
@@ -307,7 +260,7 @@ def f_eps(c, z, v):
 
 
 def ebuf(lch, pk, ca, cb, param_ebuf):
-    # pH equilibria of four buffer pairs, see Eqs: (15), (16)
+    #  see Eqs: (15), (16)
     if param_ebuf == 0:
         return 0
     if ca > 0 and cb > 0 and (ca / cb) != 0 and cb != 0:
@@ -318,10 +271,8 @@ def ebuf(lch, pk, ca, cb, param_ebuf):
 
 
 def buff_activation_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q_h2po4, q_co2, q_h2co3, q_cb, c_co2, c_h2co3, volume, scale,flow_dependent, Co2_Progressive_Activation_Param):
+    # See Eqs: (28), (29)
     if Co2_Progressive_Activation_Param == 1:
-        # print('Buffer activation at time =' + str(int(4000 * Nfac)))
-        # print('Buffer activation for co2, formate, phosphate, and ammonia', 't=', str(t))
-        # co2, formate, phosphate, and ammonia content:
         # print('q_hco3,  q_h2co3, q_co2', str(q_hco3), str(q_h2co3), str(q_co2))
 
         if flow_dependent == 1:
@@ -329,21 +280,16 @@ def buff_activation_co2_formate_phosphate_ammonia(q_h, q_nh4, q_hco3, q_h2co2, q
             q_h2co3 = -1 * (- q_h2co3 - q_h2co3 + scale * volume * (khy * c_co2 - kdhy * c_h2co3))
             q_co2  = q_hco3 + q_h2co3 + q_co2
         else:
-            # print('No Buffer Effect for co2, formate, phosphate, and ammonia')
-            q_hco3 = -1 * ( q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4 )
-            # LIS: hydration and dhydration of co2
-            # See Eq: (28)
+            q_hco3 = -1 * ( q_h + q_nh4 - q_hco3 + q_h2co2 + q_h2po4)
             q_h2co3 = -1 * (- q_h2co3 - q_h2co3 + scale * volume * (khy * c_co2 - kdhy * c_h2co3))
-            # See Eq: (29)
             q_co2 = q_hco3 + q_h2co3 + q_co2
 
     return q_hco3,  q_h2co3, q_co2
 
 
 def buff_activation(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_cell, Buffer_Activation_Param):
+    # See Eqs:(20), (21), (25)
     if Buffer_Activation_Param == 1:
-        #  pH equilibria of four buffer pairs
-        # See Eqs:(20), (21), (25)
         if qi_nh3_cell == 1:
            q_h_vary = q_h_vary + q_h2_vary - 1.e6 * qiamm
            q_h2_vary = lc_h - pk - lch(c_h_vary ,c_h2_vary)
@@ -355,8 +301,6 @@ def buff_activation(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_c
         pass
     return q_h_vary, q_h2_vary
 
-# common definition
-
 
 def zab(z, va, vb):
     return z * f * (va - vb) * 1.e-6 / rte
@@ -367,30 +311,14 @@ def phi_scale(phi, scale):
 
 
 def nhe3(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
-    # Sodium–proton  exchanger(Na + / H + exchanger) is a membrane protein
-    # that transports Na + into the cell, and H + out  of  the
-    # cell, which is located in the  cell  basal and cell  basement.They
-    # are  found in the epithelial  cells  of  the  proximal
-    # convoluted tubule.Na + / H + exchangers  are  thought
-    # to  be  implicated in other   disorders  such as hypertension.Defects in Na + / H + antiporters
-    # may  result in kidney failure.
-    if param_nah == 0:
+     if param_nah == 0:
         return[0, 0, 0]
-    else:
-        # the nhe3 model parameters
+     else:
         cxt = 1.00
-
-        # pnah_na = 0.8000e+04
-        # pnah_h = 0.2400e+04
-        # pnah_nh4 = 0.8000e+04
-        # pnah_m = 0.2000e+01
-        # pnah_mm = 0.0000
-
         knah_na = 0.3000e-01
         knah_h = 0.7200e-07
         knah_nh4 = 0.2700e-01
         knah_i = 0.1000e-05
-
         pnah_na = 0.792000e+04
         pnah_h = 0.23800e+04
         pnah_nh4 = 0.792000e+04
@@ -400,8 +328,6 @@ def nhe3(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
         # pnah_nh4 = 0.160000e-2
         pnah_mm = 0.2000e+01
         pnah_m = 0.0000
-
-        # translate concentrations to the nhe3 model
         psnah_na = pnah_na * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
         psnah_h = pnah_h * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
         psnah_nh4 = pnah_nh4 * (pnah_mm * ci_h + pnah_m * knah_i) / (ci_h + knah_i)
@@ -423,6 +349,7 @@ def nhe3(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
         jnah_nh4 = 0.0
         jnah_na = jnah_na + (psnah_na * psnah_h * cxt / sigma_nhe3) * (cmsnah_na * cisnah_h - cisnah_na * cmsnah_h) + (
                     psnah_na * psnah_nh4 * cxt / sigma_nhe3) * (cmsnah_na * cisnah_nh4 - cisnah_na * cmsnah_nh4)
+
         jnah_h = jnah_h + (psnah_h * psnah_na * cxt / sigma_nhe3) * (cmsnah_h * cisnah_na - cisnah_h * cmsnah_na) + (
                     psnah_h * psnah_nh4 * cxt / sigma_nhe3) * (cmsnah_h * cisnah_nh4 - cisnah_h * cmsnah_nh4)
         jnah_nh4 = jnah_nh4 + (psnah_nh4 * psnah_na * cxt / sigma_nhe3) * (
@@ -437,12 +364,9 @@ def matrix(init, h):
 
 
 def eQs(guess, solver):
-    # update variables
+    
     for i in range(len(guess)):
         vars[i][t] = guess[i]
-
-    # Weinstein (2007)
-    # Flow-dependent transport in a mathematical model of rat proximal tubule
     ae[t] = ae0 * (1 + mua * (pe[t] - pm))
     ae[t] = ae0 if ae[t] < ae0 else ae[t]
 
@@ -450,32 +374,26 @@ def eQs(guess, solver):
     chvl[t] = chvl0 if chvl[t] < chvl0 else chvl[t]
     l[t] = chvl[t]
 
-    # LOG Conc. of Hydrogen Interspace
     lche = pkc + lch(ce_hco3[t], ce_h2co3[t])
     ce_h[t] = 10 ** (-lche)
 
-    # ELECTROLYTE TRANSPORT ACROSS A SIMPLE EPITHELIUM of the rat proximal tubule (1992)
-    # The cell volume is presented as a function of the inverse cell impermeant species concentration
     clvl[t] = clvl0 * imp0 / imp[t]
     clvl[t] = clvl0 if imp[t] == 0 else clvl[t]
     clvl_imp = clvl0 * imp0 / imp[t]
-    # The cell height (summation of Extracellular channel volume
-    # and Intracellular compartment volume[cm3/cm2 epithelium])
+    
     l[t] = l[t] + clvl[t]
     p_i = pm
 
-    # LOG Conc. of Hydrogen Cell
     lchi = pkc + lch(ci_hco3[t], ci_h2co3[t])
     ci_h[t] = 10 ** (-lchi)
-
 
     # The Water Fluxes, See Eq: (36)
     fevm = ame * lpme * (pm - pe[t] - rt * impm) / rt
     fevs = ae[t] * lpes * (rt * imps + pe[t] - ps) / rt
     fivm = ami * lpmi * (rt * imp[t] - rt * impm + pm - p_i) / rt
     fivs = ais * lpis * (p_i - ps + rt * imps - rt * imp[t]) / rt
-    jv =  aie * lpie *  (p_i - pe[t] - rt * imp[t]) / rt
-    # Updating the Water Fluxes
+    five = aie * lpie * (p_i - pe[t] - rt * imp[t]) / rt
+    
     fevm = fevm + ame * lpme * (
             sme_na * (ce_na[t] - cm_na) + sme_k * (
                     ce_k[t] - cm_k) + sme_cl * (
@@ -488,7 +406,7 @@ def eQs(guess, solver):
                     ce_urea[t] - cm_urea) + sme_nh3 * (
                     ce_nh3[t] - cm_nh3) + sme_nh4 * (
                     ce_nh4[t] - cm_nh4) + sme_h * (
-                    ce_h [t]- cm_h) + sme_hco2 * (
+                    ce_h[t]- cm_h) + sme_hco2 * (
                     ce_hco2[t] - cm_hco2) + sme_h2co2 * (
                     ce_h2co2[t] - cm_h2co2) + sme_gluc * (
                     ce_gluc[t] - cm_gluc))
@@ -544,7 +462,7 @@ def eQs(guess, solver):
                     cs_h2co2 - ci_h2co2[t]) + sis_gluc * (
                     cs_gluc - ci_gluc[t]))
 
-    jv = jv + lpie * aie * (
+    five = five + lpie * aie * (
             sis_na * (ce_na[t] - ci_na[t]) + sis_k * (
                     ce_k[t] - ci_k[t]) + sis_cl * (
                     ce_cl[t] - ci_cl[t]) + sis_hco3 * (
@@ -561,7 +479,8 @@ def eQs(guess, solver):
                     ce_h2co2[t] - ci_h2co2[t]) + sis_gluc * (
                     ce_gluc[t] - ci_gluc[t]))
 
-    Cellular_water_fluxes = fivm - fivs - jv
+    Cellular_water_fluxes = fivm - fivs - five
+
     # Convective Fluxes, See Eqs: (37), (38)
     param_csf = 1
     fekm_na = csf(ce_na[t], cm_na, fevm, sme_na, param_csf)
@@ -632,22 +551,22 @@ def eQs(guess, solver):
     fiks_h2co2 = csf(ci_h2co2[t], cs_h2co2, fivs, sis_h2co2, param_csf)
     fiks_gluc = csf(ci_gluc[t], cs_gluc, fivs, sis_gluc, param_csf)
 
-    fike_na = csf(ci_na[t], ce_na[t], jv, sis_na, param_csf)
-    fike_na_csf = csf(ci_na[t], ce_na[t], jv, sis_na, param_csf)
-    fike_k = csf(ci_k[t], ce_k[t], jv, sis_k, param_csf)
-    fike_cl = csf(ci_cl[t], ce_cl[t], jv, sis_cl, param_csf)
-    fike_hco3 = csf(ci_hco3[t], ce_hco3[t], jv, sis_hco3, param_csf)
-    fike_h2co3 = csf(ci_h2co3[t], ce_h2co3[t], jv, sis_h2co3, param_csf)
-    fike_co2 = csf(ci_co2[t], ce_co2[t], jv, sis_co2, param_csf)
-    fike_hpo4 = csf(ci_hpo4[t], ce_hpo4[t], jv, sis_hpo4, param_csf)
-    fike_h2po4 = csf(ci_h2po4[t], ce_h2po4[t], jv, sis_h2po4, param_csf)
-    fike_urea = csf(ci_urea[t], ce_urea[t], jv, sis_urea, param_csf)
-    fike_nh3 = csf(ci_nh3[t], ce_nh3[t], jv, sis_nh3, param_csf)
-    fike_nh4 = csf(ci_nh4[t], ce_nh4[t], jv, sis_nh4, param_csf)
-    fike_h = csf(ci_h[t], ce_h[t], jv, sis_h, param_csf)
-    fike_hco2 = csf(ci_hco2[t], ce_hco2[t], jv, sis_hco2, param_csf)
-    fike_h2co2 = csf(ci_h2co2[t], ce_h2co2[t], jv, sis_h2co2, param_csf)
-    fike_gluc = csf(ci_gluc[t], ce_gluc[t], jv, sis_gluc, param_csf)
+    fike_na = csf(ci_na[t], ce_na[t], five, sis_na, param_csf)
+    fike_na_csf = csf(ci_na[t], ce_na[t], five, sis_na, param_csf)
+    fike_k = csf(ci_k[t], ce_k[t], five, sis_k, param_csf)
+    fike_cl = csf(ci_cl[t], ce_cl[t], five, sis_cl, param_csf)
+    fike_hco3 = csf(ci_hco3[t], ce_hco3[t], five, sis_hco3, param_csf)
+    fike_h2co3 = csf(ci_h2co3[t], ce_h2co3[t], five, sis_h2co3, param_csf)
+    fike_co2 = csf(ci_co2[t], ce_co2[t], five, sis_co2, param_csf)
+    fike_hpo4 = csf(ci_hpo4[t], ce_hpo4[t], five, sis_hpo4, param_csf)
+    fike_h2po4 = csf(ci_h2po4[t], ce_h2po4[t], five, sis_h2po4, param_csf)
+    fike_urea = csf(ci_urea[t], ce_urea[t], five, sis_urea, param_csf)
+    fike_nh3 = csf(ci_nh3[t], ce_nh3[t], five, sis_nh3, param_csf)
+    fike_nh4 = csf(ci_nh4[t], ce_nh4[t], five, sis_nh4, param_csf)
+    fike_h = csf(ci_h[t], ce_h[t], five, sis_h, param_csf)
+    fike_hco2 = csf(ci_hco2[t], ce_hco2[t], five, sis_hco2, param_csf)
+    fike_h2co2 = csf(ci_h2co2[t], ce_h2co2[t], five, sis_h2co2, param_csf)
+    fike_gluc = csf(ci_gluc[t], ce_gluc[t], five, sis_gluc, param_csf)
 
     # Goldman Fluxes, See Eqs: (39), (40), (41)
     param_goldman = 1
@@ -763,43 +682,38 @@ def eQs(guess, solver):
     fiks_gluc = fiks_gluc + goldman(his_gluc, ais, z_gluc, vi[t], vs, ci_gluc[t], cs_gluc, param_goldman)
 
     # net transporters on mi bourder
-
     sglt = sglt_mi(cm_na, ci_na[t], cm_gluc, ci_gluc[t], z_na, z_gluc, vm[t], vi[t], ami, lmi_nagluc,
                    param_sglt)
-    na_mi_nagluc = sglt [ 0 ]
-    gluc_mi_nagluc = sglt [ 1 ]
+    na_mi_nagluc = sglt[0]
+    gluc_mi_nagluc = sglt[1]
 
     nah2po4 = nah2po4_mi(cm_na, ci_na[t], cm_h2po4, ci_h2po4[t], z_na, z_h2po4, vm[t], vi[t], ami,
                          lmi_nah2po4, param_h2po4)
-    na_mi_nah2po4 = nah2po4 [ 0 ]
-    h2po4_mi_nah2po4 = nah2po4 [ 1 ]
+    na_mi_nah2po4 = nah2po4[0]
+    h2po4_mi_nah2po4 = nah2po4[1]
 
     clhco3 = clhco3_mi(cm_cl, ci_cl[t], cm_hco3, ci_hco3[t], z_cl, z_hco3, vm[t], vi[t], ami,
                        lmi_clhco3, param_clhco3)
-    cl_mi_clhco3 = clhco3 [ 0 ]
-    hco3_mi_clhco3 = clhco3 [ 1 ]
+    cl_mi_clhco3 = clhco3[0]
+    hco3_mi_clhco3 = clhco3[1]
 
     clhco2 = clhco2_mi(cm_cl, ci_cl[t], cm_hco2, ci_hco2[t], z_cl, z_hco2, vm[t], vi[t], ami,
                        lmi_clhco2, param_clhco2)
-    cl_mi_clhco2 = clhco2 [ 0 ]
-    hco2_mi_clhco2 = clhco2 [ 1 ]
-    # the nah exchanger translate concentrations to the nah model on  mi bourder
+    cl_mi_clhco2 = clhco2[0]
+    hco2_mi_clhco2 = clhco2[1]
 
     nah_mi = nah(cm_na, ci_na[t], cm_h, ci_h[t], z_na, z_h, vm[t], vi[t], ami, lmi_nah, param_nah_mi)
     na_mi_nah = nah_mi[0]
     h_mi_nah = nah_mi[1]
 
-
     nanh4_mi = nanh4(cm_na, ci_na[t], cm_nh4, ci_nh4[t], z_na, z_nh4, vm[t], vi[t], ami, lmi_nanh4, param_nanh4_mi)
     na_mi_nanh4 = nanh4_mi[0]
     nh4_mi_nanh4 = nanh4_mi[1]
 
-    # the nhe3 exchanger translate concentrations to the nhe3 model on  mi bourder
-
     mynah = nhe3(ci_h[t], ci_na[t], ci_nh4[t], cm_h, cm_na, cm_nh4, param_nhe3)
-    jnah_na = mynah [ 0 ]
-    jnah_h = mynah [ 1 ]
-    jnah_nh4 = mynah [ 2 ]
+    jnah_na = mynah[0]
+    jnah_h = mynah[1]
+    jnah_nh4 = mynah[2]
     jnhe3_na = nnhe3 * ami * jnah_na
     jnhe3_h = nnhe3 * ami * jnah_h
     jnhe3_nh4 = nnhe3 * ami * jnah_nh4
@@ -812,21 +726,23 @@ def eQs(guess, solver):
     fikm_gluc = fikm_gluc + gluc_mi_nagluc
     fikm_h = fikm_h + jnhe3_h + h_mi_nah
     fikm_nh4 = fikm_nh4 + jnhe3_nh4 + nh4_mi_nanh4
-    # net cotransporters on is bourder
 
     nahco3 = na_hco3(ci_na[t], cs_na, ci_hco3[t], cs_hco3, z_na, z_hco3, vi[t], vs, ais,
                      lis_nahco3, param_nahco3)
-    na_is_nahco3 = nahco3 [ 0 ]
-    hco3_is_nahco3 = nahco3 [ 1 ]
+    na_is_nahco3 = nahco3[0]
+    # print('na_is_nahco3', na_is_nahco3)
+    hco3_is_nahco3 = nahco3[1]
+    # print('hco3_is_nahco3', hco3_is_nahco3)
     kcl = k_cl(ci_k[t], cs_k, ci_cl[t], cs_cl, z_k, z_cl, vi[t], vs, ais, lis_kcl, param_kcl)
-    k_is_kcl = kcl [ 0 ]
-    cl_is_kcl = kcl [ 1 ]
+    k_is_kcl = kcl[0]
+    cl_is_kcl = kcl[1]
+
     na_clhco3 = na_cl_hco3(ci_na[t], cs_na, ci_cl[t], cs_cl, ci_hco3[t], cs_hco3, z_na, z_cl, z_hco3,
                            vi[t], vs, ais, lis_na_clhco3, param_na_cl_hco3)
-    na_is_na_clhco3 = na_clhco3 [ 0 ]
-    cl_is_na_clhco3 = na_clhco3 [ 1 ]
-    hco3_is_na_clhco3 = na_clhco3 [ 2 ]
-
+    na_is_na_clhco3 = na_clhco3[0]
+    cl_is_na_clhco3 = na_clhco3[1]
+    hco3_is_na_clhco3 = na_clhco3[2]
+    #fiks_na = fiks_na  + na_is_na_clhco3
     fiks_na = fiks_na + na_is_nahco3 + na_is_na_clhco3
     fiks_k = fiks_k + k_is_kcl
     fiks_cl = fiks_cl + cl_is_kcl + cl_is_na_clhco3
@@ -835,124 +751,118 @@ def eQs(guess, solver):
     nahco3_aie = na_hco3(ci_na[t], ce_na[t], ci_hco3[t], ce_hco3[t], z_na, z_hco3, vi[t], ve[t],
                            aie,
                            lis_nahco3, param_nahco3)
-    na_aie_nahco3 = nahco3_aie [ 0 ]
-    hco3_aie_nahco3 = nahco3_aie [ 1 ]
+    na_aie_nahco3 = nahco3_aie[0]
+    hco3_aie_nahco3 = nahco3_aie[1]
 
     kcl_aie = k_cl(ci_k[t], ce_k[t], ci_cl[t], ce_cl[t], z_k, z_cl, vi[t], ve[t], aie, lis_kcl, param_kcl)
-    k_aie_kcl = kcl_aie [ 0 ]
-    cl_aie_kcl = kcl_aie [ 1 ]
+    k_aie_kcl = kcl_aie[0]
+    cl_aie_kcl = kcl_aie[1]
 
     na_clhco3_aie = na_cl_hco3(ci_na[t], ce_na[t], ci_cl[t], ce_cl[t], ci_hco3[t], ce_hco3[t], z_na,
                                  z_cl, z_hco3,
                                  vi[t], ve[t], aie, lis_na_clhco3, param_na_cl_hco3)
-    na_aie_na_clhco3 = na_clhco3_aie [ 0 ]
-    cl_aie_na_clhco3 = na_clhco3_aie [ 1 ]
-    hco3_aie_na_clhco3 = na_clhco3_aie [ 2 ]
-
+    na_aie_na_clhco3 = na_clhco3_aie[0]
+    cl_aie_na_clhco3 = na_clhco3_aie[1]
+    hco3_aie_na_clhco3 = na_clhco3_aie[2]
     fike_na = fike_na + na_aie_nahco3 + na_aie_na_clhco3
+    #fike_na = fike_na + na_aie_na_clhco3
     fike_k = fike_k + k_aie_kcl
     fike_cl = fike_cl + cl_aie_kcl + cl_aie_na_clhco3
     fike_hco3 = fike_hco3 + hco3_aie_na_clhco3 + hco3_aie_nahco3
-
+    # fike_hco3 = fike_hco3 + hco3_aie_na_clhco3
     nak = nak_atp(ci_na[t], cs_na, ci_k[t], cs_k,  cs_nh4, param_sodium_pumps)
-    atis_na = nak [ 0 ]
-    atis_k = nak [ 1 ]
-    atis_nh4 = nak [ 2 ]
-
+    atis_na = nak[0]
+    atis_k = nak[1]
+    atis_nh4 = nak[2]
     fiks_na = fiks_na + ais * atis_na
     fiks_k = fiks_k + ais * atis_k
     fiks_nh4 = fiks_nh4 + ais * atis_nh4
-    # sodium pumps on ie bourder
-    nak = nak_atp(ci_na[t], ce_na[t], ci_k[t], ce_k[t],  ce_nh4[t], param_sodium_pumps)
-    atie_na = nak [ 0 ]
-    atie_k = nak [ 1 ]
-    atie_nh4 = nak [ 2 ]
 
+    nak = nak_atp(ci_na[t], ce_na[t], ci_k[t], ce_k[t],  ce_nh4[t], param_sodium_pumps)
+    atie_na = nak[0]
+    atie_k = nak[1]
+    atie_nh4 = nak[2]
     fike_na = fike_na + aie * atie_na
     fike_k = fike_k + aie * atie_k
     fike_nh4 = fike_nh4 + aie * atie_nh4
 
-    # proton pumps
     atmi_h = h_atp_mi(cm_h, ci_h[t], vm[t], vi[t], z_h, ami, param_H_pumps)
-
-    # proton pumps flux update
     fikm_h = fikm_h + atmi_h
-    # Electroneutrality, See Eq:(30), (31)
+    # See Eq:(30), (31)
     phie_en = 0
-    phie_en = phie_en + z_na * ce_na[t] + z_k * ce_k[t] + z_cl * ce_cl [
-        t ] + z_hco3 * ce_hco3[t] + z_h2co3 * ce_h2co3[t] + z_co2 * ce_co2[t] + z_hpo4 * ce_hpo4 [
-                  t ] + z_h2po4 * ce_h2po4[t] + z_urea * ce_urea[t] + z_nh3 * ce_nh3[t] + z_nh4 * ce_nh4 [
-                  t ] + z_h * ce_h[t] + z_hco2 * ce_hco2[t] + z_h2co2 * ce_h2co2[t] + z_gluc * ce_gluc[t]
+    phie_en = phie_en + z_na * ce_na[t] + z_k * ce_k[t] + z_cl * ce_cl[
+        t] + z_hco3 * ce_hco3[t] + z_h2co3 * ce_h2co3[t] + z_co2 * ce_co2[t] + z_hpo4 * ce_hpo4[
+                  t] + z_h2po4 * ce_h2po4[t] + z_urea * ce_urea[t] + z_nh3 * ce_nh3[t] + z_nh4 * ce_nh4[
+                  t] + z_h * ce_h[t] + z_hco2 * ce_hco2[t] + z_h2co2 * ce_h2co2[t] + z_gluc * ce_gluc[t]
 
     phii_en = imp[t] * zimp
     phii_en = phii_en - cbuf[t] + z_na * ci_na[t] + z_k * ci_k[t] \
               + z_cl * ci_cl[t] + z_hco3 * ci_hco3[t] + z_h2co3 * ci_h2co3[t] + z_co2 * ci_co2[t] + z_hpo4 * \
               ci_hpo4[t] + z_h2po4 * ci_h2po4[t] + z_urea * ci_urea[t] + z_nh3 * ci_nh3[t] + z_nh4 * \
-              ci_nh4[t] + z_h * ci_h[t] + z_hco2 * ci_hco2[t] + z_h2co2 * ci_h2co2[t] + z_gluc * ci_gluc [
-                  t ]
+              ci_nh4[t] + z_h * ci_h[t] + z_hco2 * ci_hco2[t] + z_h2co2 * ci_h2co2[t] + z_gluc * ci_gluc[
+                  t]
 
     # Mass conservation, See Eqs: (6), (7), (8), (9)
-    phie_vlm = fevs - fevm - jv + rtau * (chvl[t] - chvl [ t - 1 ])
-    qe_na = feks_na - fekm_na - fike_na + rtau * (ce_na[t] * chvl[t] - ce_na [ t - 1 ] * chvl [ t - 1 ])
-    qe_k = feks_k - fekm_k - fike_k + rtau * (ce_k[t] * chvl[t] - ce_k [ t - 1 ] * chvl [ t - 1 ])
-    qe_cl = feks_cl - fekm_cl - fike_cl + rtau * (ce_cl[t] * chvl[t] - ce_cl [ t - 1 ] * chvl [ t - 1 ])
-    qe_hco3 = feks_hco3 - fekm_hco3 - fike_hco3 + rtau * (ce_hco3[t] * chvl[t] - ce_hco3 [ t - 1 ] * chvl [ t - 1 ])
+    phie_vlm = fevs - fevm - five + rtau * (chvl[t] - chvl[t - 1])
+    qe_na = feks_na - fekm_na - fike_na + rtau * (ce_na[t] * chvl[t] - ce_na[t - 1] * chvl[t - 1])
+    qe_k = feks_k - fekm_k - fike_k + rtau * (ce_k[t] * chvl[t] - ce_k[t - 1] * chvl[t - 1])
+    qe_cl = feks_cl - fekm_cl - fike_cl + rtau * (ce_cl[t] * chvl[t] - ce_cl[t - 1] * chvl[t - 1])
+    qe_hco3 = feks_hco3 - fekm_hco3 - fike_hco3 + rtau * (ce_hco3[t] * chvl[t] - ce_hco3[t - 1] * chvl[t - 1])
     qe_h2co3 = feks_h2co3 - fekm_h2co3 - fike_h2co3 + rtau * (
-            ce_h2co3[t] * chvl[t] - ce_h2co3 [ t - 1 ] * chvl [ t - 1 ])
-    qe_co2 = feks_co2 - fekm_co2 - fike_co2 + rtau * (ce_co2[t] * chvl[t] - ce_co2 [ t - 1 ] * chvl [ t - 1 ])
-    qe_hpo4 = feks_hpo4 - fekm_hpo4 - fike_hpo4 + rtau * (ce_hpo4[t] * chvl[t] - ce_hpo4 [ t - 1 ] * chvl [ t - 1 ])
+            ce_h2co3[t] * chvl[t] - ce_h2co3[t - 1] * chvl[t - 1])
+    qe_co2 = feks_co2 - fekm_co2 - fike_co2 + rtau * (ce_co2[t] * chvl[t] - ce_co2[t - 1] * chvl[t - 1])
+    qe_hpo4 = feks_hpo4 - fekm_hpo4 - fike_hpo4 + rtau * (ce_hpo4[t] * chvl[t] - ce_hpo4[t - 1] * chvl[t - 1])
     qe_h2po4 = feks_h2po4 - fekm_h2po4 - fike_h2po4 + rtau * (
-            ce_h2po4[t] * chvl[t] - ce_h2po4 [ t - 1 ] * chvl [ t - 1 ])
+            ce_h2po4[t] * chvl[t] - ce_h2po4[t - 1] * chvl[t - 1])
     qe_urea = feks_urea - fekm_urea - fike_urea + rtau * (
-            ce_urea[t] * chvl[t] - ce_urea [ t - 1 ] * chvl [ t - 1 ])
-    qe_nh3 = feks_nh3 - fekm_nh3 - fike_nh3 + rtau * (ce_nh3[t] * chvl[t] - ce_nh3 [ t - 1 ] * chvl [ t - 1 ])
-    qe_nh4 = feks_nh4 - fekm_nh4 - fike_nh4 + rtau * (ce_nh4[t] * chvl[t] - ce_nh4 [ t - 1 ] * chvl [ t - 1 ])
-    qe_h = feks_h - fekm_h - fike_h + rtau * (ce_h[t] * chvl[t] - ce_h [ t - 1 ] * chvl [ t - 1 ])
-    qe_hco2 = feks_hco2 - fekm_hco2 - fike_hco2 + rtau * (ce_hco2[t] * chvl[t] - ce_hco2 [ t - 1 ] * chvl [ t - 1 ])
+            ce_urea[t] * chvl[t] - ce_urea[t - 1] * chvl[t - 1])
+    qe_nh3 = feks_nh3 - fekm_nh3 - fike_nh3 + rtau * (ce_nh3[t] * chvl[t] - ce_nh3[t - 1] * chvl[t - 1])
+    qe_nh4 = feks_nh4 - fekm_nh4 - fike_nh4 + rtau * (ce_nh4[t] * chvl[t] - ce_nh4[t - 1] * chvl[t - 1])
+    qe_h = feks_h - fekm_h - fike_h + rtau * (ce_h[t] * chvl[t] - ce_h[t - 1] * chvl[t - 1])
+    qe_hco2 = feks_hco2 - fekm_hco2 - fike_hco2 + rtau * (ce_hco2[t] * chvl[t] - ce_hco2[t - 1] * chvl[t - 1])
     qe_h2co2 = feks_h2co2 - fekm_h2co2 - fike_h2co2 + rtau * (
-            ce_h2co2[t] * chvl[t] - ce_h2co2 [ t - 1 ] * chvl [ t - 1 ])
+            ce_h2co2[t] * chvl[t] - ce_h2co2[t - 1] * chvl[t - 1])
 
     qe_gluc = feks_gluc - fekm_gluc - fike_gluc + rtau * (
-            ce_gluc[t] * chvl[t] - ce_gluc [ t - 1 ] * chvl [ t - 1 ])
+            ce_gluc[t] * chvl[t] - ce_gluc[t - 1] * chvl[t - 1])
 
-    phii_vlm = fivs - fivm + jv + rtau * (clvl[t] - clvl [ t - 1 ])
+    phii_vlm = fivs - fivm + five + rtau * (clvl[t] - clvl[t - 1])
 
     qi_na = fiks_na - fikm_na + fike_na + rtau * (
-            ci_na[t] * clvl[t] - ci_na [ t - 1 ] * clvl [ t - 1 ])
+            ci_na[t] * clvl[t] - ci_na[t - 1] * clvl[t - 1])
 
     qi_k = fiks_k - fikm_k + fike_k + rtau * (
-            ci_k[t] * clvl[t] - ci_k [ t - 1 ] * clvl [ t - 1 ])
+            ci_k[t] * clvl[t] - ci_k[t - 1] * clvl[t - 1])
     qi_cl = fiks_cl - fikm_cl + fike_cl + rtau * (
-            ci_cl[t] * clvl[t] - ci_cl [ t - 1 ] * clvl [ t - 1 ])
+            ci_cl[t] * clvl[t] - ci_cl[t - 1] * clvl[t - 1])
 
     qi_hco3 = fiks_hco3 - fikm_hco3 + fike_hco3 + rtau * (
-            ci_hco3[t] * clvl[t] - ci_hco3 [ t - 1 ] * clvl [ t - 1 ])
+            ci_hco3[t] * clvl[t] - ci_hco3[t - 1] * clvl[t - 1])
     qi_h2co3 = fiks_h2co3 - fikm_h2co3 + fike_h2co3 + rtau * (
-            ci_h2co3[t] * clvl[t] - ci_h2co3 [ t - 1 ] * clvl [ t - 1 ])
+            ci_h2co3[t] * clvl[t] - ci_h2co3[t - 1] * clvl[t - 1])
     qi_co2 = fiks_co2 - fikm_co2 + fike_co2 + rtau * (
-            ci_co2[t] * clvl[t] - ci_co2 [ t - 1 ] * clvl [ t - 1 ])
+            ci_co2[t] * clvl[t] - ci_co2[t - 1] * clvl[t - 1])
     qi_hpo4 = fiks_hpo4 - fikm_hpo4 + fike_hpo4 + rtau * (
-            ci_hpo4[t] * clvl[t] - ci_hpo4 [ t - 1 ] * clvl [ t - 1 ])
+            ci_hpo4[t] * clvl[t] - ci_hpo4[t - 1] * clvl[t - 1])
     qi_h2po4 = fiks_h2po4 - fikm_h2po4 + fike_h2po4 + rtau * (
-            ci_h2po4[t] * clvl[t] - ci_h2po4 [ t - 1 ] * clvl [ t - 1 ])
+            ci_h2po4[t] * clvl[t] - ci_h2po4[t - 1] * clvl[t - 1])
 
     qi_urea = fiks_urea - fikm_urea + fike_urea + rtau * (
-            ci_urea[t] * clvl[t] - ci_urea [ t - 1 ] * clvl [ t - 1 ])
+            ci_urea[t] * clvl[t] - ci_urea[t - 1] * clvl[t - 1])
     qi_nh3 = fiks_nh3 - fikm_nh3 + fike_nh3 + rtau * (
-            ci_nh3[t] * clvl[t] - ci_nh3 [ t - 1 ] * clvl [ t - 1 ])
+            ci_nh3[t] * clvl[t] - ci_nh3[t - 1] * clvl[t - 1])
     qi_nh4 = fiks_nh4 - fikm_nh4 + fike_nh4 + rtau * (
-            ci_nh4[t] * clvl[t] - ci_nh4 [ t - 1 ] * clvl [ t - 1 ])
+            ci_nh4[t] * clvl[t] - ci_nh4[t - 1] * clvl[t - 1])
     qi_h = fiks_h - fikm_h + fike_h + rtau * (
-            ci_h[t] * clvl[t] - ci_h [ t - 1 ] * clvl [ t - 1 ])
+            ci_h[t] * clvl[t] - ci_h[t - 1] * clvl[t - 1])
     qi_hco2 = fiks_hco2 - fikm_hco2 + fike_hco2 + rtau * (
-            ci_hco2[t] * clvl[t] - ci_hco2 [ t - 1 ] * clvl [ t - 1 ])
+            ci_hco2[t] * clvl[t] - ci_hco2[t - 1] * clvl[t - 1])
     qi_h2co2 = fiks_h2co2 - fikm_h2co2 + fike_h2co2 + rtau * (
-            ci_h2co2[t] * clvl[t] - ci_h2co2 [ t - 1 ] * clvl [ t - 1 ])
+            ci_h2co2[t] * clvl[t] - ci_h2co2[t - 1] * clvl[t - 1])
     qi_gluc = fiks_gluc - fikm_gluc + fike_gluc + rtau * (
-            ci_gluc[t] * clvl[t] - ci_gluc [ t - 1 ] * clvl [ t - 1 ])
+            ci_gluc[t] * clvl[t] - ci_gluc[t - 1] * clvl[t - 1])
 
-    # the proton flux must include the cellular buffers
-    qi_h = qi_h - rtau * (cbuf[t] * clvl[t] - cbuf [ t - 1 ] * clvl [ t - 1 ])
+    qi_h = qi_h - rtau * (cbuf[t] * clvl[t] - cbuf[t - 1] * clvl[t - 1])
     scale = 1e6
     phie_vlm = phi_scale(phie_vlm, scale)
     qe_na = phi_scale(qe_na, scale)
@@ -988,33 +898,31 @@ def eQs(guess, solver):
     qi_h2co2 = phi_scale(qi_h2co2, scale)
     qi_gluc = phi_scale(qi_gluc, scale)
 
-    # now set the phis in terms of the solute generation rates
-    # first the non-reactive species
     # solver = 1
     if solver == 1:
-        phi [ 0 ] = phie_en
-        phi [ 1 ] = phie_vlm
+        phi[0] = phie_en
+        phi[1] = phie_vlm
         phie_na = qe_na
-        phi [ 2 ] = phie_na
+        phi[2] = phie_na
         phie_k = qe_k
-        phi [ 3 ] = phie_k
+        phi[3] = phie_k
         phie_cl = qe_cl
-        phi [ 4 ] = phie_cl
-        phi [ 10 ] = qe_urea
+        phi[4] = phie_cl
+        phi[10] = qe_urea
         phie_gluc = qe_gluc
-        phi [ 15 ] = phie_gluc
-        phi [ 16 ] = phii_en
-        phi [ 17 ] = phii_vlm
+        phi[15] = phie_gluc
+        phi[16] = phii_en
+        phi[17] = phii_vlm
         phii_na = qi_na
-        phi [ 18 ] = phii_na
+        phi[18] = phii_na
         phii_k = qi_k
-        phi [ 19 ] = phii_k
+        phi[19] = phii_k
         phii_cl = qi_cl
-        phi [ 20 ] = phii_cl
+        phi[20] = phii_cl
         phii_urea = qi_urea
-        phi [ 26 ] = phii_urea
+        phi[26] = phii_urea
         phii_gluc = qi_gluc
-        phi [ 31 ] = phii_gluc
+        phi[31] = phii_gluc
 
         Buffer_Co2_LIS_Param = 1
         Buffer_Co2_Cell_Param = 1
@@ -1025,36 +933,34 @@ def eQs(guess, solver):
         Buffer_HCO2_LIS_Param = 1
         Buffer_HCO2_CELL_Param = 1
 
-
-        phi [ 8 ], phi [ 9 ] = buff_activation(qe_hpo4, qe_h2po4, lche, pkp, ce_hpo4[t], ce_h2po4[t],
+        phi[8], phi[9] = buff_activation(qe_hpo4, qe_h2po4, lche, pkp, ce_hpo4[t], ce_h2po4[t],
                                                0, Buffer_HPO4_LIS_Param)
-        phi [ 24 ], phi [ 25 ] = buff_activation(qi_hpo4, qi_h2po4, lchi, pkp, ci_hpo4[t], ci_h2po4[t],
+        phi[24], phi[25] = buff_activation(qi_hpo4, qi_h2po4, lchi, pkp, ci_hpo4[t], ci_h2po4[t],
                                                  0, Buffer_HPO4_CELL_Param)
-        phi [ 11 ], phi [ 12 ] = buff_activation(qe_nh3, qe_nh4, lche, pkn, ce_nh3[t], ce_nh4[t],
+        phi[11], phi[12] = buff_activation(qe_nh3, qe_nh4, lche, pkn, ce_nh3[t], ce_nh4[t],
                                                  0, Buffer_NH3_LIS_Param)
-        phi [ 27 ], phi [ 28 ] = buff_activation(qi_nh3, qi_nh4, lchi, pkn, ci_nh3[t], ci_nh4[t],
+        phi[27], phi[28] = buff_activation(qi_nh3, qi_nh4, lchi, pkn, ci_nh3[t], ci_nh4[t],
                                                  1, Buffer_NH3_CELL_Param)
-        phi [ 13 ], phi [ 14 ] = buff_activation(qe_hco2, qe_h2co2, lche, pkf, ce_hco2[t], ce_h2co2[t],
+        phi[13], phi[14] = buff_activation(qe_hco2, qe_h2co2, lche, pkf, ce_hco2[t], ce_h2co2[t],
                                                  0, Buffer_HCO2_LIS_Param)
-        phi [ 29 ], phi [ 30 ] = buff_activation(qi_hco2, qi_h2co2, lchi, pkf, ci_hco2[t], ci_h2co2[t],
+        phi[29], phi[30] = buff_activation(qi_hco2, qi_h2co2, lchi, pkf, ci_hco2[t], ci_h2co2[t],
                                                  0, Buffer_HCO2_CELL_Param)
 
-        # cell buffer content and ph equilibrium
         qi_cb = cbuf[t] + hcbuf[t] - (tbuf * clvl0 / clvl[t])
-        phi [ 32 ] = qi_cb
+        phi[32] = qi_cb
         c_eQ_h2po4 = np.log10(abs(
             (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))) if ci_h2po4[t] * cbuf[t] == 0 or (
                 (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]) <= 0) else np.log10(
             (ci_hpo4[t] * hcbuf[t]) / (ci_h2po4[t] * cbuf[t]))
         phi_ph_eQ = pkb - pkp - c_eQ_h2po4
-        phi [ 33 ] = phi_ph_eQ
-        phi [ 5 ], phi [ 6 ], phi [ 7 ] = buff_activation_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
+        phi[33] = phi_ph_eQ
+        phi[5], phi[6], phi[7] = buff_activation_co2_formate_phosphate_ammonia(qe_h, qe_nh4, qe_hco3, qe_h2co2,
                                                                                         qe_h2po4, qe_co2, qe_h2co3, 0,
                                                                                         ce_co2[t],
                                                                                         ce_h2co3[t], chvl[t],
                                                                                         scale, 0,
                                                                                         Buffer_Co2_LIS_Param)
-        phi [ 21 ], phi [ 22 ], phi [ 23 ] = buff_activation_co2_formate_phosphate_ammonia(qi_h, qi_nh4, qi_hco3,
+        phi[21], phi[22], phi[23] = buff_activation_co2_formate_phosphate_ammonia(qi_h, qi_nh4, qi_hco3,
                                                                                            qi_h2co2,
                                                                                            qi_h2po4, qi_co2, qi_h2co3,
                                                                                            qi_cb,
@@ -1076,30 +982,32 @@ def eQs(guess, solver):
                 fikm_nh4 + z_h * fikm_h + z_hco2 * fikm_hco2 + z_h2co2 * fikm_h2co2 + z_gluc *
                 fikm_gluc)
         phie_cur = cure + curi
-        phi [ 34 ] = phie_cur
+        phi[34] = phie_cur
         return phi
     else:
-        # flux
         flux = 1
         if flux:
             flux_na = fikm_na + fekm_na
             na_nak =  aie * atie_na
             flux_na_goldman = fekm_na_goldman + fikm_na_goldman
-            hco3_clhco3 = clhco3 [ 1 ]
-    return [fekm_na, fekm_cl, fekm_k, fekm_gluc,
-            fikm_na, fikm_cl, fikm_k, fikm_gluc,
-            fiks_na, fiks_cl, fiks_k, fiks_gluc,
-            fike_na, fike_cl, fike_k, fike_gluc,
-            feks_na, feks_cl, feks_k, feks_gluc, fekm_na_csf, fekm_na_goldman, fikm_na, fikm_na_csf,
-            fikm_na_goldman, jnhe3_na, na_mi_nagluc, na_mi_nah2po4, feks_na_csf, feks_na_goldman, flux_na,
-            fekm_na_csf + fikm_na_csf, flux_na_goldman,
-            jnhe3_na + na_mi_nagluc + na_mi_nah2po4, gluc_mi_nagluc, na_nak, hco3_clhco3, Cellular_water_fluxes,
-            clvl_imp ]
+            hco3_clhco3 = clhco3[1]
+    return[fekm_na, fekm_cl, fekm_k, fekm_gluc,
+           fikm_na, fikm_cl, fikm_k, fikm_gluc,
+           fiks_na, fiks_cl, fiks_k, fiks_gluc,
+           fike_na, fike_cl, fike_k, fike_gluc,
+           feks_na, feks_cl, feks_k, feks_gluc, fekm_na_csf, fekm_na_goldman, fikm_na, fikm_na_csf,
+           fikm_na_goldman, jnhe3_na, na_mi_nagluc, na_mi_nah2po4, feks_na_csf, feks_na_goldman, flux_na,
+           fekm_na_csf + fikm_na_csf, flux_na_goldman,
+           jnhe3_na + na_mi_nagluc + na_mi_nah2po4, gluc_mi_nagluc, na_nak, hco3_clhco3, Cellular_water_fluxes,
+           clvl_imp]
+
+
 t0 = 0
 tf = 2000
 T = 20000
 dt = (tf - t0) / (T - 1)
 rtau = 1 / dt
+
 ve = matrix(-0.894329e-02, T)
 pe = matrix(-0.230937e+02, T)
 ce_na = matrix(0.1404e+00, T)
@@ -1208,22 +1116,22 @@ na_mi_nah2po4 = matrix(0, T)
 jnhe3_na = matrix(0, T)
 cl_mi_clhco2 = matrix(0, T)
 cl_mi_clhco3 = matrix(0, T)
-vars = [ ve, pe, ce_na, ce_k,
+vars = [ve, pe, ce_na, ce_k,
          ce_cl, ce_hco3, ce_h2co3, ce_co2, ce_hpo4, ce_h2po4, ce_urea, ce_nh3, ce_nh4, ce_hco2, ce_h2co2, ce_gluc,
          vi, imp, ci_na, ci_k, ci_cl, ci_hco3, ci_h2co3, ci_co2, ci_hpo4, ci_h2po4, ci_urea, ci_nh3, ci_nh4, ci_hco2,
          ci_h2co2, ci_gluc, cbuf, hcbuf, vm]
 
-Figure_4a = 1
-Figure_4b = 1
-Figure_4c = 1
-Figure_5 = 1
-Figure_9_10 = 1
+Figure_4a = 0
+Figure_4b = 0
+Figure_4c = 0
+Figure_5 = 0
+Figure_9_10 = 0
 Figure_6_7_8 = 1
 
 flx = [fekm_na, fekm_cl, fekm_k, fekm_gluc, fikm_na, fikm_cl, fikm_k, fikm_gluc,
       fiks_na, fiks_cl, fiks_k, fiks_gluc, fike_na, fike_cl, fike_k, fike_gluc,
       feks_na, feks_cl, feks_k, feks_gluc, fekm_na_csf, fekm_na_goldman, fikm_na, fikm_na_csf,
-      fikm_na_goldman,jnhe3_na, na_mi_nagluc, na_mi_nah2po4, feks_na_csf, feks_na_goldman, flux_na,
+      fikm_na_goldman, jnhe3_na, na_mi_nagluc, na_mi_nah2po4, feks_na_csf, feks_na_goldman, flux_na,
       fekm_na_csf + fikm_na_csf, flux_na_goldman,
       jnhe3_na + na_mi_nagluc + na_mi_nah2po4, gluc_mi_nagluc, na_nak, hco3_clhco3, Cellular_water_fluxes,
       clvl_imp]
@@ -1231,70 +1139,70 @@ if Figure_9_10:
     from PCT_GLOB_new import *
 
     t = 0
-    guess = [ var [ t ] for var in vars ]
+    guess = [var[t] for var in vars]
     from scipy import optimize
 
-    mylist = [ 0.0 for i in range(T) ]
+    mylist = [0.0 for i in range(T)]
     pm = 15.000
     cm_cl = 0.11322499
     cm_na = 0.14
     cm_gluc = 0.005
     stepwise = 1
     if stepwise:
-        cmna = [ 0.100, 0.110, 0.120, 0.13, 0.140 ]
-        n_nhe3 = [ 0.27500e-08, 0.2000e-08, 0.1500e-08, 0.1000e-08, 0.01000e-08 ]
+        cmna = [0.100, 0.110, 0.120, 0.13, 0.140]
+        n_nhe3 = [0.27500e-08, 0.2000e-08, 0.1500e-08, 0.1000e-08, 0.01000e-08]
         while True:
             t += 1
             if t == T:
                 break
             elif 0 < t <= T / len(cmna):
-                nnhe3 = n_nhe3 [ 0 ]
-                mylist [ t ] = n_nhe3 [ 0 ]
+                nnhe3 = n_nhe3[0]
+                mylist[t] = n_nhe3[0]
                 result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [ var [ t ] for var in vars ]
+                guess = [var[t] for var in vars]
                 result_flx = eQs(guess, 0)
                 for i in range(len(result_flx)):
-                    flx [ i ] [ t ] = result_flx [ i ]
+                    flx[i][t] = result_flx[i]
             elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
-                nnhe3 = n_nhe3 [ 1 ]
-                mylist [ t ] = n_nhe3 [ 1 ]
+                nnhe3 = n_nhe3[1]
+                mylist[t] = n_nhe3[1]
                 result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [ var [ t ] for var in vars ]
+                guess = [var[t] for var in vars]
                 result_flx = eQs(guess, 0)
                 for i in range(len(result_flx)):
-                    flx [ i ] [ t ] = result_flx [ i ]
+                    flx[i][t] = result_flx[i]
             elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
-                nnhe3 = n_nhe3 [ 2 ]
-                mylist [ t ] = n_nhe3 [ 2 ]
+                nnhe3 = n_nhe3[2]
+                mylist[t] = n_nhe3[2]
                 result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [ var [ t ] for var in vars ]
+                guess = [var[t] for var in vars]
                 result_flx = eQs(guess, 0)
                 for i in range(len(result_flx)):
-                    flx [ i ] [ t ] = result_flx [ i ]
+                    flx[i][t] = result_flx[i]
             elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
-                nnhe3 = n_nhe3 [ 3 ]
-                mylist [ t ] = n_nhe3 [ 3 ]
+                nnhe3 = n_nhe3[3]
+                mylist[t] = n_nhe3[3]
                 result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [ var [ t ] for var in vars ]
+                guess = [var[t] for var in vars]
                 result_flx = eQs(guess, 0)
                 for i in range(len(result_flx)):
-                    flx [ i ] [ t ] = result_flx [ i ]
+                    flx[i][t] = result_flx[i]
             elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
-                # lmi_nagluc  = lmi_na_gluc  [ 4 ]
-                # mylist [ t ] =lmi_na_gluc  [ 4 ]
-                # lmi_nah = lmi_na_h [ 4 ]
-                # mylist [ t ] = lmi_na_h [ 4 ]
-                nnhe3 = n_nhe3 [ 4 ]
-                mylist [ t ] = n_nhe3 [ 4 ]
+                # lmi_nagluc  = lmi_na_gluc [4]
+                # mylist[t] =lmi_na_gluc [4]
+                # lmi_nah = lmi_na_h[4]
+                # mylist[t] = lmi_na_h[4]
+                nnhe3 = n_nhe3[4]
+                mylist[t] = n_nhe3[4]
 
-                # n_p = l_na_k [ 4 ]
-                # mylist [ t ] = l_na_k [ 4 ]
+                # n_p = l_na_k[4]
+                # mylist[t] = l_na_k[4]
 
                 result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [ var [ t ] for var in vars ]
+                guess = [var[t] for var in vars]
                 result_flx = eQs(guess, 0)
                 for i in range(len(result_flx)):
-                    flx [ i ] [ t ] = result_flx [ i ]
+                    flx[i][t] = result_flx[i]
     else:
         print('Error')
 
@@ -1303,47 +1211,47 @@ if Figure_9_10:
     mylist = np.asarray(mylist)
     fig8 = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=4, figure=fig8)
-    ax1 = fig8.add_subplot(spec2 [ 0, 0 ])
-    ax1.plot(t [ 0:-2 ], mylist [ 0:-2 ], 'r-')
+    ax1 = fig8.add_subplot(spec2[0, 0])
+    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
     ax1.set_ylabel('L_NHE3', color='blue')
     ax1.set_title('Figure_10', color='black')
-    ax4 = fig8.add_subplot(spec2 [1,0 ])
+    ax4 = fig8.add_subplot(spec2[1,0])
     ax4.plot(t, jnhe3_na, 'b-')
     ax4.set_ylabel('flux_na_nhe3', color='blue')
 
-    ax2 = fig8.add_subplot(spec2 [2, 0 ])
+    ax2 = fig8.add_subplot(spec2[2, 0])
     ax2.plot(t, hco3_clhco3, 'b-')
     ax2.set_ylabel(' flux_hco3_clcho3 ', color='blue')
 
-    ax3 = fig8.add_subplot(spec2 [ 3, 0 ])
+    ax3 = fig8.add_subplot(spec2[3, 0])
     ax3.plot(t, na_nak, 'b-')
     ax3.set_ylabel('flux_Na_nak ', color='blue')
-    ax3.set_xlabel('Time [s] ', color='black')
+    ax3.set_xlabel('Time[s] ', color='black')
     fig3 = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig3)
-    ax1 = fig3.add_subplot(spec2 [ 0, 0 ])
-    ax1.plot(t [ 0:-2 ], mylist [ 0:-2 ], 'r-')
+    ax1 = fig3.add_subplot(spec2[0, 0])
+    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
     ax1.set_ylabel('L_NHE3', color='blue')
     ax1.set_title('Figure_9', color='black')
-    ax2 = fig3.add_subplot(spec2 [ 1, 0 ])
+    ax2 = fig3.add_subplot(spec2[1, 0])
     ax2.plot(t, ci_na, 'b-')
     ax2.set_ylabel(' ci_na ', color='blue')
 
-    ax3 = fig3.add_subplot(spec2 [ 2, 0 ])
+    ax3 = fig3.add_subplot(spec2[2, 0])
     ax3.plot(t, ci_cl, 'b-')
     ax3.set_ylabel('ci_cl ', color='blue')
 
-    ax4 = fig3.add_subplot(spec2 [ 3, 0 ])
+    ax4 = fig3.add_subplot(spec2[3, 0])
     ax4.plot(t, ci_hco3, 'b-')
     ax4.set_ylabel('ci_hco3 ', color='blue')
-    ax5 = fig3.add_subplot(spec2 [ 4, 0 ])
+    ax5 = fig3.add_subplot(spec2[4, 0])
     ax5.plot(t, ci_hco2, 'b-')
     ax5.set_ylabel('ci_hco2 ', color='blue')
 
-    ax6 = fig3.add_subplot(spec2 [ 5, 0 ])
+    ax6 = fig3.add_subplot(spec2[5, 0])
     ax6.plot(t, clvl_imp, 'b-')
     ax6.set_ylabel('clvl ', color='blue')
-    ax6.set_xlabel('Time [s] ', color='blue')
+    ax6.set_xlabel('Time[s] ', color='blue')
     plt.show()
 
     my_list_Figure_9_10 = {'t': t, 'L_NHE3': mylist, 'flux_na_nah': jnhe3_na, 'flux_hco3_clcho3': hco3_clhco3,
@@ -1357,12 +1265,12 @@ if Figure_9_10:
 if Figure_5:
     from PCT_GLOB_new import *
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     NaCl = 1
     scale_per = 0.12
-    cmna = [ 0.14 + NaCl * j * 0.14 * scale_per for j in range(4)]
+    cmna = [0.14 + NaCl * j * 0.14 * scale_per for j in range(4)]
     cmna.append(0.14)
-    cmcl = [ 0.1132 + NaCl * j * 0.1132 * scale_per for j in range(4)]
+    cmcl = [0.1132 + NaCl * j * 0.1132 * scale_per for j in range(4)]
     cmcl.append(0.1132)
     mylist_na = [0.1 for i in range(T)]
     mylist_cl = [0.1 for i in range(T)]
@@ -1373,109 +1281,109 @@ if Figure_5:
         elif 0 < t <= T / len(cmna):
             cm_na = cmna[0]
             cm_cl = cmcl[0]
-            cs_na = cmna [ 0]
-            cs_cl = cmcl [ 0 ]
+            cs_na = cmna[0]
+            cs_cl = cmcl[0]
             mylist_na[t] = cmna[0]
-            mylist_cl[t] = cmcl [ 0 ]
+            mylist_cl[t] = cmcl[0]
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess =[var[t] for var in vars]
+            guess = [var[t] for var in vars]
             result_flx=eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t]=result_flx[i]
         elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
             mylist_na[t]=cmna[1]
-            mylist_cl[t]=cmcl [ 1]
-            cm_na=cmna [1 ]
-            cm_cl=cmcl [ 1 ]
-            cs_na=cmna [ 1 ]
-            cs_cl=cmcl [ 1]
+            mylist_cl[t]=cmcl[1]
+            cm_na=cmna[1]
+            cm_cl=cmcl[1]
+            cs_na=cmna[1]
+            cs_cl=cmcl[1]
             result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess =[var[t] for var in vars]
+            guess = [var[t] for var in vars]
             result_flx=eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t]=result_flx[i]
         elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
-            cm_na=cmna [ 2 ]
-            cm_cl=cmcl [ 2 ]
-            cs_na=cmna [ 2 ]
-            cs_cl=cmcl [ 2 ]
+            cm_na=cmna[2]
+            cm_cl=cmcl[2]
+            cs_na=cmna[2]
+            cs_cl=cmcl[2]
             mylist_na[t]=cmna[2]
-            mylist_cl[t]=cmcl [2]
+            mylist_cl[t]=cmcl[2]
             result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess =[var[t] for var in vars]
+            guess = [var[t] for var in vars]
             result_flx=eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t]=result_flx[i]
         elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
-            cm_na=cmna [3]
-            cm_cl=cmcl [3]
-            cs_na=cmna [3]
-            cs_cl=cmcl [3]
+            cm_na=cmna[3]
+            cm_cl=cmcl[3]
+            cs_na=cmna[3]
+            cs_cl=cmcl[3]
             mylist_na[t]=cmna[3]
-            mylist_cl[ t ]=cmcl [ 3 ]
+            mylist_cl[t]=cmcl[3]
             result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess =[var[t] for var in vars]
+            guess = [var[t] for var in vars]
             result_flx=eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t]=result_flx[i]
         elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
-            cm_na=cmna [ 4 ]
-            cm_cl=cmcl [4 ]
-            cs_na=cmna [4 ]
-            cs_cl=cmcl [ 4 ]
+            cm_na=cmna[4]
+            cm_cl=cmcl[4]
+            cs_na=cmna[4]
+            cs_cl=cmcl[4]
             mylist_na[t]=cmna[4]
-            mylist_cl[ t ]=cmcl [4]
+            mylist_cl[t]=cmcl[4]
             result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess =[var[t] for var in vars]
+            guess = [var[t] for var in vars]
             result_flx=eQs(guess, 0)
             for i in range(len(result_flx)):
-                flx[i][t]=result_flx[i]
+                flx[i][t] = result_flx[i]
         else:
             print('t is not in a defined range.')
     t=np.linspace(t0, tf, T)
     my_list_Figure_5 = {'t': t, 'mylist_na': mylist_na, 'mylist_cl': mylist_cl, 'vm': vm,
                             'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_k': ci_k }
     pickled_list = pickle.dumps(my_list_Figure_5)
-    of = open('Data_Figure_5_v1.py', 'wb')
+    of = open('Data_Figure_5.py', 'wb')
     of.write(pickled_list)
     of.close()
-    fig3=plt.figure(constrained_layout=True)
-    spec2=gridspec.GridSpec(ncols=1, nrows=5, figure=fig3)
-    ax1=fig3.add_subplot(spec2 [ 0, 0 ])
-    ax1.plot(t [ 0:-2 ], mylist_na [ 0:-2 ], color='#007282', label="Na ")
-    ax1.plot(t [ 0:-2 ], mylist_cl [ 0:-2 ], color='#b66dff', label="Cl ")
+    fig3 = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=5, figure=fig3)
+    ax1 = fig3.add_subplot(spec2[0, 0])
+    ax1.plot(t[0:-2], mylist_na[0:-2], color='#007282', label="Na ")
+    ax1.plot(t[0:-2], mylist_cl[0:-2], color='#b66dff', label="Cl ")
     ax1.set_ylabel('Cm, Cs', color='black')
     ax1.set_xlim(-5, tf)
     ax1.legend(frameon=False)
-    ax0 = fig3.add_subplot(spec2 [1, 0 ])
+    ax0 = fig3.add_subplot(spec2[1, 0])
     ax0.set_ylabel('Vm', color='black')
-    ax0.plot(t [ 0:-2 ], vm[ 0:-2 ], 'black')
+    ax0.plot(t[0:-2], vm[0:-2], 'black')
     ax0.set_xlim(-5, tf)
     ax0.set_ylim(0.0, 0.15)
-    ax2 = fig3.add_subplot(spec2 [2, 0 ])
+    ax2 = fig3.add_subplot(spec2[2, 0])
     ax2.set_ylabel('ci_na', color='black')
-    ax2.plot(t [ 0:-2 ], ci_na[ 0:-2 ], 'black')
+    ax2.plot(t[0:-2], ci_na[0:-2], 'black')
     ax2.set_xlim(-5, tf)
-    ax3 = fig3.add_subplot(spec2 [3, 0 ])
-    ax3.plot(t [ 0:-2 ], ci_k[ 0:-2 ], 'black')
+    ax3 = fig3.add_subplot(spec2[3, 0])
+    ax3.plot(t[0:-2], ci_k[0:-2], 'black')
     ax3.set_ylabel('ci_k', color='black')
     ax3.set_xlim(-5, tf)
-    ax4 = fig3.add_subplot(spec2 [4, 0 ])
-    ax4.plot(t [ 0:-2 ], ci_cl[ 0:-2 ], 'black')
+    ax4 = fig3.add_subplot(spec2[4, 0])
+    ax4.plot(t[0:-2], ci_cl[0:-2], 'black')
     ax4.set_ylabel('ci_cl', color='black')
     ax4.set_xlim(-5, tf)
     plt.show()
 if Figure_4a:
     from PCT_GLOB_new import *
-    mylist_na = [ 0.1 for i in range(T) ]
-    mylist_cl = [ 0.1 for i in range(T) ]
-    mylist_hco3 = [ 0.1 for i in range(T) ]
+    mylist_na = [0.1 for i in range(T)]
+    mylist_cl = [0.1 for i in range(T)]
+    mylist_hco3 = [0.1 for i in range(T)]
     cm_hco3_0 = 0.004
     cm_hco3_f = 0.05
     slope = (cm_hco3_f - cm_hco3_0) / (tf - t0)
-    mylist_hco3 = [ cm_hco3_0 + 0.1 * slope * i for i in range(T) ]
+    mylist_hco3 = [cm_hco3_0 + 0.1 * slope * i for i in range(T)]
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
 
     while True:
         t += 1
@@ -1489,35 +1397,35 @@ if Figure_4a:
             hie_h2co2 = 0.0600
             cm_hco3 = mylist_hco3[t]
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
 
     my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco3': mylist_hco3}
     pickled_list = pickle.dumps(my_list)
-    of = open('Data_Figure_4a_v1.py', 'wb')
+    of = open('Data_Figure_4a.py', 'wb')
     of.write(pickled_list)
     of.close()
     fig4 = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4)
-    ax3 = fig4.add_subplot(spec2 [ 0, 0 ])
-    ax3.set_ylabel('flux_cl [mmol/sec]', color='black')
-    ax3.set_xlabel('cm_hco3 [M]', color='black')
+    ax3 = fig4.add_subplot(spec2[0, 0])
+    ax3.set_ylabel('flux_cl[mmol/sec]', color='black')
+    ax3.set_xlabel('cm_hco3[M]', color='black')
     ax3.set_title('Figure_4a', color='black')
-    x1 = ax3.plot(mylist_hco3 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
-    x2 = ax3.plot(mylist_hco3 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
-    x3 = ax3.plot(mylist_hco3 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
-    ax3.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
+    x1 = ax3.plot(mylist_hco3[30:-2], flux_cl[30:-2], 'black')
+    x2 = ax3.plot(mylist_hco3[30:-2], fikm_cl[30:-2], 'g')
+    x3 = ax3.plot(mylist_hco3[30:-2], fekm_cl[30:-2], 'blue')
+    ax3.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
 if Figure_4b:
     from PCT_GLOB_new import *
     mylist_hco2 = [0.1 for i in range(T)]
     cm_hco2_0 = 0.004
     cm_hco2_f = 0.05
     slope = (cm_hco2_f - cm_hco2_0) / (tf - t0)
-    mylist_hco2 = [ cm_hco2_0 + 0.1 * slope * i for i in range(T)]
+    mylist_hco2 = [cm_hco2_0 + 0.1 * slope * i for i in range(T)]
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
 
     while True:
         t += 1
@@ -1533,35 +1441,35 @@ if Figure_4b:
             cs_hco2 = mylist_hco2[t]
             cm_hco3 = 0.004
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
     fig4b = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4b)
-    ax1 = fig4b.add_subplot(spec2 [ 0, 0 ])
+    ax1 = fig4b.add_subplot(spec2[0, 0])
     ax1.set_title('Figure_4b', color='black')
-    ax1.set_ylabel('flux_cl [mmol/sec]', color='black')
-    ax1.set_xlabel('cm_hco2 [M] & cs_hco2 [M] ', color='black')
-    x1 = ax1.plot(mylist_hco2 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
-    x2 = ax1.plot(mylist_hco2 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
-    x3 = ax1.plot(mylist_hco2 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
-    ax1.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
+    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
+    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
+    x1 = ax1.plot(mylist_hco2[30:-2], flux_cl[30:-2], 'black')
+    x2 = ax1.plot(mylist_hco2[30:-2], fikm_cl[30:-2], 'g')
+    x3 = ax1.plot(mylist_hco2[30:-2], fekm_cl[30:-2], 'blue')
+    ax1.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
     plt.show()
     my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco2': mylist_hco2}
     pickled_list = pickle.dumps(my_list)
-    of = open('Data_Figure_4b_v1.py', 'wb')
+    of = open('Data_Figure_4b.py', 'wb')
     of.write(pickled_list)
     of.close()
 if Figure_4c:
     from PCT_GLOB_new import *
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     cm_hco3 = 0.004
     cm_hco2_0 = 0.004
     cm_hco2_f = 0.05
     slope = (cm_hco2_f - cm_hco2_0) / (tf - t0)
-    mylist_hco2 = [ cm_hco2_0 + 0.1 * slope * i for i in range(T) ]
+    mylist_hco2 = [cm_hco2_0 + 0.1 * slope * i for i in range(T)]
     while True:
         t += 1
         if t == T:
@@ -1575,61 +1483,61 @@ if Figure_4c:
             cm_hco2 = mylist_hco2[t]
             cs_hco2 = mylist_hco2[t]
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
     my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco2': mylist_hco2}
     pickled_list = pickle.dumps(my_list)
-    of = open('Data_Figure_4c_v1.py', 'wb')
+    of = open('Data_Figure_4c.py', 'wb')
     of.write(pickled_list)
     of.close()
     fig4 = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4)
-    ax1 = fig4.add_subplot(spec2 [0, 0])
+    ax1 = fig4.add_subplot(spec2[0, 0])
     ax1.set_title('Figure_4c', color='black')
-    ax1.set_ylabel('flux_cl [mmol/sec]', color='black')
-    ax1.set_xlabel('cm_hco2 [M] & cs_hco2 [M] ', color='black')
-    x1 = ax1.plot(mylist_hco2 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
-    x2 = ax1.plot(mylist_hco2 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
-    x3 = ax1.plot(mylist_hco2 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
-    ax1.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
+    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
+    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
+    x1 = ax1.plot(mylist_hco2[30:-2], flux_cl[30:-2], 'black')
+    x2 = ax1.plot(mylist_hco2[30:-2], fikm_cl[30:-2], 'g')
+    x3 = ax1.plot(mylist_hco2[30:-2], fekm_cl[30:-2], 'blue')
+    ax1.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
 if Figure_6_7_8:
+
     from PCT_GLOB_new import *
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     while True:
         t += 1
         if t == T:
             break
         else:
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_default = {'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-                        'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-                        'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-                        'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-                       'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                       'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                       'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                       'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                       'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]
-                           }
-    
-    slt_con_default = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1],  'Gluc': ci_gluc[-1]}
-    flx_na_mem_default = [ feks_na[-1], fike_na[-1], fiks_na[-1], fekm_na[-1], fikm_na[-1],
-                       flux_na[-1]]
+    my_list_default = {'na': [fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                       'k': [fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                       'cl': [fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                       'gluc': [fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
+                       'fekm': [fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                       'fikm': [fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
+                       'fiks': [fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                       'fike': [fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
+                       'feks': [feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
 
-    epithelial_flx_variation_default = [ fekm_na_csf[-1]+ fikm_na_csf[-1],
-                                     fekm_na_goldman[-1]+ fikm_na_goldman[-1],
-                                     jnhe3_na[-1]+ na_mi_nagluc[-1]+ na_mi_nah2po4[-1]]
-    epithelial_flx_elct_chmcl_default = [ jnhe3_na[-1], na_mi_nagluc[-1], na_mi_nah2po4[-1]]
+    slt_con_default = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1],  'Gluc': ci_gluc[-1]}
+    flx_na_mem_default = [feks_na[-1], fike_na[-1], fiks_na[-1], fekm_na[-1], fikm_na[-1], flux_na[-1]]
+
+    epithelial_flx_variation_default = [fekm_na_csf[-1] + fikm_na_csf[-1],
+                                        fekm_na_goldman[-1] + fikm_na_goldman[-1],
+                                        jnhe3_na[-1] + na_mi_nagluc[-1] + na_mi_nah2po4[-1]]
+
+    epithelial_flx_elct_chmcl_default = [jnhe3_na[-1], na_mi_nagluc[-1], na_mi_nah2po4[-1]]
 
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     while True:
         t += 1
         if t == T:
@@ -1637,28 +1545,28 @@ if Figure_6_7_8:
         else:
             param_sodium_pumps = 0
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_nak =  {'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-                    'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-                    'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-                    'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-                    'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                    'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                    'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                    'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                    'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]
-                    }
+    my_list_nak = {'na': [fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                   'k': [fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                   'cl': [fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                   'gluc': [fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1], feks_gluc[-1]],
+                   'fekm': [fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                   'fikm': [fikm_na[-1], fikm_k[-1], fikm_cl[-1], fikm_gluc[-1]],
+                   'fiks': [fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                   'fike': [fike_na[-1], fike_k[-1], fike_cl[-1], fike_gluc[-1]],
+                   'feks': [feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
 
     slt_con_nak = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1], 'Gluc': ci_gluc[-1]}
     flx_na_mem_nak = [feks_na[-1], fike_na[-1], fiks_na[-1], fekm_na[-1], fikm_na[-1], flux_na[-1]]
-    epithelial_flx_variation_nak = [ fekm_na_csf[-1]+ fikm_na_csf[-1], fekm_na_goldman[-1]+ fikm_na_goldman[-1], jnhe3_na[-1]+ na_mi_nagluc [-1]+ na_mi_nah2po4[-1]]
-    epithelial_flx_elct_chmcl_nak = [ jnhe3_na[-1],  na_mi_nagluc [-1],  na_mi_nah2po4[-1]]
+    epithelial_flx_variation_nak = [fekm_na_csf[-1] + fikm_na_csf[-1], fekm_na_goldman[-1] + fikm_na_goldman[-1],
+                                    jnhe3_na[-1] + na_mi_nagluc[-1] + na_mi_nah2po4[-1]]
+    epithelial_flx_elct_chmcl_nak = [jnhe3_na[-1],  na_mi_nagluc[-1],  na_mi_nah2po4[-1]]
 
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     while True:
         t += 1
         if t == T:
@@ -1667,66 +1575,78 @@ if Figure_6_7_8:
             param_sodium_pumps = 1
             param_kcl = 0
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_kcl = {'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-        'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-        'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-        'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-        'fekm':[fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-        'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-        'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-        'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-        'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
+    my_list_kcl = {'na': [fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                   'k': [fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                   'cl': [fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                   'gluc': [fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1], feks_gluc[-1]],
+                   'fekm': [fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                   'fikm': [fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
+                   'fiks': [fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                   'fike': [fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
+                   'feks': [feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
 
     slt_con_kcl = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1], 'Gluc': ci_gluc[-1]}
     t = 0
-    guess = [ var[t] for var in vars ]
+
+    t = 0
+    guess = [ var [ t ] for var in vars ]
     while True:
         t += 1
         if t == T:
             break
-        else:
+        elif t < T/4:
             param_sodium_pumps = 1
             param_kcl = 1
-            param_nahco3 = 1.e-24
+            param_nahco3 = 1
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_nahco3 ={'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-                      'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-                     'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-                     'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-                     'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                     'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                     'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                     'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                     'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]
-                     }
+        else:
+            param_sodium_pumps = 1
+            param_kcl = 1
+            param_nahco3 = 0
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            guess = [var[t] for var in vars]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx[i][t] = result_flx[i]
+    my_list_nahco3 = {'na':[fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                      'k':[fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                      'cl':[fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                      'gluc':[fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1], feks_gluc[-1]],
+                      'fekm':[fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                      'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1], fikm_gluc[-1]],
+                      'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                      'fike':[fike_na[-1], fike_k[-1], fike_cl[-1], fike_gluc[-1]],
+                      'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
+
     slt_con_nahco3 = {'Na': ci_na[-1],  'K': ci_k[-1], 'Cl':ci_cl[-1], 'Gluc': ci_gluc[-1]}
+    # print('ci_k[-1]',ci_k[-1])
     from collections import defaultdict
     my_list_Figure6A = defaultdict(list)
     for d in (my_list_default, my_list_nak, my_list_kcl, my_list_nahco3):
         for key, value in d.items():
-            my_list_Figure6A [ key ].append(value)
+            my_list_Figure6A[key].append(value)
     pickled_list = pickle.dumps(my_list_Figure6A)
-    of = open('Data_Figure_6A_v1.py', 'wb')
+    of = open('Data_Figure_6A.py', 'wb')
     of.write(pickled_list)
     of.close()
     my_list_Figure6B = defaultdict(list)
     for d in (slt_con_default, slt_con_nak, slt_con_kcl, slt_con_nahco3):
         for key, value in d.items():
-            my_list_Figure6B [ key ].append(value)
+            my_list_Figure6B[key].append(value)
     pickled_list = pickle.dumps(my_list_Figure6B)
-    of = open('Data_Figure_6B_v1.py', 'wb')
+    of = open('Data_Figure_6B.py', 'wb')
     of.write(pickled_list)
     of.close()
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     while True:
         t += 1
         if t == T:
@@ -1737,24 +1657,25 @@ if Figure_6_7_8:
             param_nahco3 = 1
             param_nhe3 = 0
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_nhe3 ={'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-     'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-     'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-     'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-                     'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                     'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                     'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                     'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                     'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
-    
-    slt_con_nhe3 = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1], 'Gluc':ci_gluc[-1]}
-    flx_na_mem_nhe3 = [feks_na[-1], fike_na[-1], fiks_na[-1], fekm_na[-1], fikm_na[-1], fekm_na[-1]+ fikm_na[-1]]
-    epithelial_flx_variation_nhe3 = [ fekm_na_csf[-1]+ fikm_na_csf[-1], fekm_na_goldman[-1]+ fikm_na_goldman[-1], jnhe3_na[-1]+ na_mi_nagluc [-1]+ na_mi_nah2po4[-1]]
-    epithelial_flx_elct_chmcl_nhe3 = [ jnhe3_na[-1],  na_mi_nagluc [-1],  na_mi_nah2po4[-1]]
+    my_list_nhe3 = {'na':[fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                    'k':[fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                    'cl':[fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                    'gluc':[fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1], feks_gluc[-1]],
+                    'fekm':[fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                    'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1], fikm_gluc[-1]],
+                    'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                    'fike':[fike_na[-1], fike_k[-1], fike_cl[-1], fike_gluc[-1]],
+                    'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
+
+    slt_con_nhe3 = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1], 'Gluc': ci_gluc[-1]}
+    flx_na_mem_nhe3 = [feks_na[-1], fike_na[-1], fiks_na[-1], fekm_na[-1], fikm_na[-1], fekm_na[-1] + fikm_na[-1]]
+    epithelial_flx_variation_nhe3 = [fekm_na_csf[-1] + fikm_na_csf[-1], fekm_na_goldman[-1] + fikm_na_goldman[-1],
+                                     jnhe3_na[-1] + na_mi_nagluc[-1]+ na_mi_nah2po4[-1]]
+    epithelial_flx_elct_chmcl_nhe3 = [jnhe3_na[-1],  na_mi_nagluc[-1],  na_mi_nah2po4[-1]]
     t = 0
     guess = [var[t] for var in vars]
     while True:
@@ -1768,23 +1689,23 @@ if Figure_6_7_8:
             param_nhe3 = 1
             param_sglt = 0
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
-    my_list_nagluc = {'na': [ fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
-     'k': [ fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
-     'cl': [ fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
-     'gluc': [ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
-                     'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                     'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                     'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                     'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                     'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
+    my_list_nagluc = {'na':[fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                      'k':[fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                      'cl':[fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                      'gluc':[fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1],fike_gluc[-1], feks_gluc[-1]],
+                      'fekm':[fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                      'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
+                      'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                      'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
+                      'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
 
     slt_con_nagluc = {'Na': ci_na[-1], 'K': ci_k[-1], 'Cl': ci_cl[-1],  'Gluc': ci_gluc[-1]}
     t = 0
-    guess = [ var[t] for var in vars ]
+    guess = [var[t] for var in vars]
     while True:
         t += 1
         if t == T:
@@ -1797,181 +1718,172 @@ if Figure_6_7_8:
             param_sglt = 1
             param_h2po4 = 0
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [ var[t] for var in vars ]
+            guess = [var[t] for var in vars]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
                 flx[i][t] = result_flx[i]
 
-    my_list_nah2po4 =  {'na':[fekm_na[-1],fikm_na[-1], fiks_na[-1],fike_na[-1],feks_na[-1]],
-                      'k':[fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1],feks_k[-1]],
-                      'cl':[fekm_cl[-1], fikm_cl[-1],fiks_cl[-1],fike_cl[-1], feks_cl[-1]],
-                      'gluc':[ fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1],  feks_gluc[-1]],
-                     'fekm': [ fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
-                     'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
-                     'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
-                     'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
-                     'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
+    my_list_nah2po4 = {'na':[fekm_na[-1], fikm_na[-1], fiks_na[-1], fike_na[-1], feks_na[-1]],
+                       'k':[fekm_k[-1], fikm_k[-1], fiks_k[-1], fike_k[-1], feks_k[-1]],
+                       'cl':[fekm_cl[-1], fikm_cl[-1], fiks_cl[-1], fike_cl[-1], feks_cl[-1]],
+                       'gluc':[fekm_gluc[-1], fikm_gluc[-1], fiks_gluc[-1], fike_gluc[-1],  feks_gluc[-1]],
+                       'fekm':[fekm_na[-1], fekm_k[-1], fekm_cl[-1], fekm_gluc[-1]],
+                       'fikm':[fikm_na[-1], fikm_k[-1], fikm_cl[-1],  fikm_gluc[-1]],
+                       'fiks':[fiks_na[-1], fiks_k[-1], fiks_cl[-1], fiks_gluc[-1]],
+                       'fike':[fike_na[-1], fike_k[-1], fike_cl[-1],  fike_gluc[-1]],
+                       'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
     slt_con_nah2po4 = {'Na': ci_na[-1],  'K': ci_k[-1], 'Cl': ci_cl[-1],'Gluc': ci_gluc[-1]}
-    #clear(result_flx)
+
     from collections import defaultdict
-    my_list_Figure7 = {'flx_na_mem_default': flx_na_mem_default , 'epithelial_flx_variation_default':epithelial_flx_variation_default, 'epithelial_flx_elct_chmcl_default': epithelial_flx_elct_chmcl_default,
-                       'flx_na_mem_nak': flx_na_mem_nak , 'epithelial_flx_variation_nak':epithelial_flx_variation_nak, 'epithelial_flx_elct_chmcl_nak': epithelial_flx_elct_chmcl_nak,
-                       'flx_na_mem_nhe3': flx_na_mem_nhe3 , 'epithelial_flx_variation_nhe3':epithelial_flx_variation_nhe3, 'epithelial_flx_elct_chmcl_nhe3': epithelial_flx_elct_chmcl_nhe3}
+    my_list_Figure7 = {'flx_na_mem_default': flx_na_mem_default, 'epithelial_flx_variation_default':
+                       epithelial_flx_variation_default, 'epithelial_flx_elct_chmcl_default': epithelial_flx_elct_chmcl_default,
+                       'flx_na_mem_nak': flx_na_mem_nak, 'epithelial_flx_variation_nak':epithelial_flx_variation_nak, 'epithelial_flx_elct_chmcl_nak': epithelial_flx_elct_chmcl_nak,
+                       'flx_na_mem_nhe3': flx_na_mem_nhe3, 'epithelial_flx_variation_nhe3':epithelial_flx_variation_nhe3, 'epithelial_flx_elct_chmcl_nhe3': epithelial_flx_elct_chmcl_nhe3}
     pickled_list = pickle.dumps(my_list_Figure7)
-    of = open('Data_Figure_7_v1.py', 'wb')
+    of = open('Data_Figure_7.py', 'wb')
     of.write(pickled_list)
     of.close()
     my_list_Figure8A = defaultdict(list)
     for d in (my_list_default, my_list_nhe3, my_list_nagluc, my_list_nah2po4):
         for key, value in d.items():
-            my_list_Figure8A [ key ].append(value)
+            my_list_Figure8A[key].append(value)
     pickled_list = pickle.dumps(my_list_Figure8A)
-    of = open('Data_Figure_8A_v1.py', 'wb')
+    of = open('Data_Figure_8A.py', 'wb')
     of.write(pickled_list)
     of.close()
     my_list_Figure8B = defaultdict(list)
     for d in (slt_con_default, slt_con_nhe3, slt_con_nagluc, slt_con_nah2po4):
         for key, value in d.items():
-            my_list_Figure8B [ key ].append(value)
+            my_list_Figure8B[key].append(value)
     pickled_list = pickle.dumps(my_list_Figure8B)
-    of = open('Data_Figure_8B_v1.py', 'wb')
+    of = open('Data_Figure_8B.py', 'wb')
     of.write(pickled_list)
     of.close()
-
-
-
-    of = open('Data_Figure_6A_v1.py', 'rb')
+    of = open('Data_Figure_6A.py', 'rb')
     read_file = of.read()
     my_loaded_list = pickle.loads(read_file)
     of.close()
-    scale_factor = 1
-    flux_na = np.array(my_loaded_list [ 'na' ])
-    flux_k = np.array(my_loaded_list [ 'k' ])
-    flux_cl = np.array(my_loaded_list [ 'cl' ])
-    flux_gluc = np.array(my_loaded_list [ 'gluc' ])
-    df1 = pd.DataFrame(flux_na,
-                       index=[ " A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0" ],
-                       columns=[ "EM", "IM", "IS", "IE", "ES" ])
-    df2 = pd.DataFrame(flux_k,
-                       index=[ " A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0" ],
-                       columns=[ "EM", "IM", "IS", "IE", "ES" ])
-    df3 = pd.DataFrame(flux_cl,
-                       index=[ " A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0" ],
-                       columns=[ "EM", "IM", "IS", "IE", "ES" ])
-    df4 = pd.DataFrame(flux_gluc,
-                       index=[ " A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0" ],
-                       columns=["EM", "IM", "IS", "IE", "ES"])
 
-    import pandas as pd
+    flux_na = np.array(my_loaded_list['na'])
+    flux_k = np.array(my_loaded_list['k'])
+    flux_cl = np.array(my_loaded_list['cl'])
+    flux_gluc = np.array(my_loaded_list['gluc'])
+    df1 = pd.DataFrame(flux_na,
+                       index= [" A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0"],
+                       columns= ["EM", "IM", "IS", "IE", "ES"])
+    df2 = pd.DataFrame(flux_k,
+                       index= [" A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0"],
+                       columns= ["EM", "IM", "IS", "IE", "ES"])
+    df3 = pd.DataFrame(flux_cl,
+                       index= [" A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0"],
+                       columns= ["EM", "IM", "IS", "IE", "ES"])
+    df4 = pd.DataFrame(flux_gluc,
+                       index= [" A Original Setup", "B NaK = 0", "C KCl = 0", "D NaHCO3 = 0"],
+                       columns= ["EM", "IM", "IS", "IE", "ES"])
+
     plt.figure(12, figsize=(12, 12))
-    # Then, just call :
-    plot_clustered_stacked([ df1, df2, df3, df4 ], ["Na", "K", "Cl", "Gluc"],title="Figure_6A, Membrane Fluxes [mmol/s.cm2]")
+    plot_clustered_stacked([df1, df2, df3, df4],["Na", "K", "Cl", "Gluc"], title= "Figure_6A, Membrane Fluxes[mmol/s.cm2]")
 #    plt.savefig('Figure_6A' + '.png')
-    of = open('Data_Figure_8A_v1.py', 'rb')
-    read_file = of.read()
-    my_loaded_list = pickle.loads(read_file)
-    of.close()
-    scale_factor = 1
-    flux_na = np.array( my_loaded_list [ 'na' ])
-    flux_k = np.array(my_loaded_list [ 'k' ])
-    flux_cl = np.array(my_loaded_list [ 'cl' ])
-    flux_gluc = np.array(my_loaded_list [ 'gluc' ])
-    df1 = pd.DataFrame(flux_na,
-                       index=[ "A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0" ],
-                       columns=[ "EM", "IM", "IS", "IE", "ES" ])
-    df2 = pd.DataFrame(flux_k,
-                       index=[ "A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0" ],
-                       columns=["EM", "IM", "IS", "IE", "ES" ])
-    df3 = pd.DataFrame(flux_cl,
-                       index=[ "A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0" ],
-                       columns=["EM", "IM", "IS", "IE", "ES" ])
-    df4 = pd.DataFrame(flux_gluc,
-                       index=["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
-                       columns=["EM", "IM", "IS", "IE", "ES"])
-    import pandas as pd
-
-    plt.figure(18, figsize=(12, 12))
-    plot_clustered_stacked([ df1, df2, df3,df4 ], [ "Na", "K", "Cl", "Gluc" ], title="Figure_8A, Membrane Fluxes [mmol/s.cm2]")
-    #plt.savefig('Figure_8A' + '.png')
-    of = open('Data_Figure_6B_v1.py', 'rb')
+#     of = open('Data_Figure_8A.py', 'rb')
+#     read_file = of.read()
+#     my_loaded_list = pickle.loads(read_file)
+#     of.close()
+#
+#     flux_na = np.array( my_loaded_list['na'])
+#     flux_k = np.array(my_loaded_list['k'])
+#     flux_cl = np.array(my_loaded_list['cl'])
+#     flux_gluc = np.array(my_loaded_list['gluc'])
+#     df1 = pd.DataFrame(flux_na,
+#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
+#                        columns= ["EM", "IM", "IS", "IE", "ES"])
+#     df2 = pd.DataFrame(flux_k,
+#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
+#                        columns= ["EM", "IM", "IS", "IE", "ES"])
+#     df3 = pd.DataFrame(flux_cl,
+#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
+#                        columns= ["EM", "IM", "IS", "IE", "ES"])
+#     df4 = pd.DataFrame(flux_gluc,
+#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
+#                        columns= ["EM", "IM", "IS", "IE", "ES"])
+#
+#     plt.figure(18, figsize=(12, 12))
+#     plot_clustered_stacked([df1, df2, df3,df4],["Na", "K", "Cl", "Gluc"], title="Figure_8A, Membrane Fluxes[mmol/s.cm2]")
+    # plt.savefig('Figure_8A' + '.png')
+    of = open('Data_Figure_6B.py', 'rb')
     read_file = of.read()
     my_loaded_list1 = pickle.loads(read_file)
     of.close()
-    w =0.1
+
     Na = np.array(my_loaded_list1['Na'])
-    K = np.array(my_loaded_list1 [ 'K'])
-    Cl = np.array(my_loaded_list1 ['Cl'])
-    Gluc = np.array(my_loaded_list1 ['Gluc'])
+    K = np.array(my_loaded_list1['K'])
+    Cl = np.array(my_loaded_list1['Cl'])
+    Gluc = np.array(my_loaded_list1['Gluc'])
     x = ["Original Setup", "NaK = 0", "KCl = 0", "NaHCO3 = 0"]
 
     bar1 = np.arange(len(x))
-    bar2 = [ i + 2.0 * w for i in bar1 ]
-    bar3 = [ i + 2.0 * w for i in bar2 ]
-    bar4 = [ i + 2.0 * w for i in bar3 ]
-    bar5 = [ i + w for i in bar2 ]
+    w = 0.1
+    bar2 = [i + 2.0 * w for i in bar1]
+    bar3 = [i + 2.0 * w for i in bar2]
+    bar4 = [i + 2.0 * w for i in bar3]
+    bar5 = [i + w for i in bar2]
     plt.figure(19)
     plt.bar(bar1, Na, 0.2, color="#2B9F78", label="Na")
     plt.bar(bar2, K, 0.2, color="#007282", label="K")
     plt.bar(bar3, Cl, 0.2, color="black", label="Cl")
     plt.bar(bar4, Gluc, 0.2, color="#D55E00", label="Gluc")
     plt.title('Figure_6B', fontsize=12)
-    plt.ylabel('Cellular Concentration [mol/l]', fontsize=12)
+    plt.ylabel('Cellular Concentration[mol/l]', fontsize=12)
     plt.xlabel("Solutes", fontsize=12)
     plt.xticks(bar5, x, fontsize=11)
     plt.legend(frameon=False)
-    #plt.savefig('Figure_8B' + '.png')
-    of = open('Data_Figure_8B_v1.py', 'rb')
+    # plt.savefig('Figure_8B' + '.png')
+    of = open('Data_Figure_8B.py', 'rb')
     read_file = of.read()
     my_loaded_list1 = pickle.loads(read_file)
     of.close()
-    w = 0.1
-    Na = np.array(my_loaded_list1 [ 'Na' ])
-    K = np.array(my_loaded_list1 [ 'K' ])
-    Cl = np.array(my_loaded_list1 [ 'Cl' ])
-    Gluc = np.array(my_loaded_list1 [ 'Gluc' ])
-    x = [ "Original Setup", "NHE3 = 0", "SGLT = 0", "NaH2PO4 = 0" ]
+
+    Na = np.array(my_loaded_list1['Na'])
+    K = np.array(my_loaded_list1['K'])
+    Cl = np.array(my_loaded_list1['Cl'])
+    Gluc = np.array(my_loaded_list1['Gluc'])
+    x = ["Original Setup", "NHE3 = 0", "SGLT = 0", "NaH2PO4 = 0"]
 
     bar1 = np.arange(len(x))
-    bar2 = [ i + 2.0 * w for i in bar1 ]
-    bar3 = [ i + 2.0 * w for i in bar2 ]
-    bar4 = [ i + 2.0 * w for i in bar3 ]
-    bar5 = [ i + w for i in bar2 ]
+    bar2 = [i + 2.0 * w for i in bar1]
+    bar3 = [i + 2.0 * w for i in bar2]
+    bar4 = [i + 2.0 * w for i in bar3]
+    bar5 = [i + w for i in bar2]
     plt.figure(20)
     plt.bar(bar1, Na, 0.2, color="#2B9F78", label="Na")
     plt.bar(bar2, K, 0.2, color="#007282", label="K")
     plt.bar(bar3, Cl, 0.2, color="black", label="Cl")
     plt.bar(bar4, Gluc, 0.2, color="#D55E00", label="Gluc")
     plt.title('Figure_8B', fontsize=12)
-    plt.ylabel('Cellular Concentration [mol/l]', fontsize=12)
+    plt.ylabel('Cellular Concentration[mol/l]', fontsize=12)
     plt.xlabel("Solutes", fontsize=12)
     plt.xticks(bar5, x, fontsize=11)
     plt.legend(frameon=False)
-
-    #plt.savefig('Figure_6B' + '.png')
-    of = open('Data_Figure_7_v1.py', 'rb')
+    # plt.savefig('Figure_6B' + '.png')
+    of = open('Data_Figure_7.py', 'rb')
     read_file = of.read()
     my_loaded_list = pickle.loads(read_file)
     of.close()
 
     fig = plt.figure(num=21, figsize=(12, 12))
-    x1=['ES', 'IE', 'IS', 'ME', 'MI','EPTL']
+    x1= ['ES', 'IE', 'IS', 'ME', 'MI','EPTL']
     ax1 = fig.add_subplot(3, 3, 1)
-    ax1.bar(x1, np.array(my_loaded_list['flx_na_mem_default']), color=[ 'black', '#b66dff', '#24ff24', '#007282', '#2B9F78', '#920000'])
+    ax1.bar(x1, np.array(my_loaded_list['flx_na_mem_default']), color= ['black', '#b66dff', '#24ff24', '#007282', '#2B9F78', '#920000'])
     # ax1.set_ylim(-0.2,7.5)
     plt.setp(plt.gca(), xticklabels=[])
-
-    # Defines values for the second plot
     x2 = ['CSF', 'GLD', 'ECHMCL']
-
     ax2 = fig.add_subplot(3, 3, 2)
-
     Epithelial = my_loaded_list['epithelial_flx_variation_default']
-    ax2.bar(x2, Epithelial, color=['black', '#b66dff','#2B9F78'])
+    ax2.bar(x2, Epithelial, color= ['black', '#b66dff','#2B9F78'])
     # ax2.set_ylim(-0.2,8.4)
     plt.setp(plt.gca(), xticklabels=[])
     x3 = ['NHE3', 'SGLT','NaH2PO4']
     ax3 = fig.add_subplot(3, 3, 3)
-    ax3.bar(x3, my_loaded_list['epithelial_flx_elct_chmcl_default'], color=['#db6d00', '#b66dff', '#2B9F78'])
+    ax3.bar(x3, my_loaded_list['epithelial_flx_elct_chmcl_default'], color= ['#db6d00', '#b66dff', '#2B9F78'])
     # ax3.set_ylim(-0.2,3.8)
     plt.setp(plt.gca(), xticklabels=[])
     ax4 = fig.add_subplot(3, 3, 4)
@@ -1990,39 +1902,33 @@ if Figure_6_7_8:
     plt.setp(plt.gca(), xticklabels=[])
     # ax5.set_ylim(-0.2, 8.4)
     ax5.legend(shadow=False, fancybox=False, frameon=False)
-    ax6=fig.add_subplot(3, 3, 6)
-    colors=['#db6d00', '#b66dff','#2B9F78']
-    labels=['NHE3','SGLT','NaH2PO4']
+    ax6 = fig.add_subplot(3, 3, 6)
+    colors = ['#db6d00', '#b66dff','#2B9F78']
+    labels = ['NHE3','SGLT','NaH2PO4']
     for tmpX, tmpY, color, label in zip(x3, my_loaded_list['epithelial_flx_elct_chmcl_nak'], colors, labels):
         ax6.bar(tmpX, tmpY, color=color, label=label)
     plt.setp(plt.gca(), xticklabels=[])
     # ax6.set_ylim(-0.1,3.8)
     ax6.legend(shadow=False, fancybox=False, frameon=False)
     ax7=fig.add_subplot(3, 3, 7)
-    ax7.bar(x1, my_loaded_list['flx_na_mem_nhe3'], color=['black', '#b66dff','#24ff24', '#007282','#2B9F78','#920000'])
-    ax7.set_xlabel('Membrane Flux_Na [mmol/s.cm2]', color='black')
+    ax7.bar(x1, my_loaded_list['flx_na_mem_nhe3'], color= ['black', '#b66dff','#24ff24', '#007282','#2B9F78','#920000'])
+    ax7.set_xlabel('Membrane Flux_Na[mmol/s.cm2]', color='black')
     # ax7.set_ylim(-0.2,7.5)
-
     plt.setp(plt.gca(), xticklabels=[])
-    # ax7.legend(shadow=False, fancybox=False, frameon=False)
     ax8=fig.add_subplot(3, 3, 8)
-    ax8.bar(x2,my_loaded_list['epithelial_flx_variation_nhe3'], color=['black', '#b66dff','#2B9F78'])
-    ax8.set_xlabel('Epithelial Flux_Na [mmol/s.cm2]', color='black')
+    ax8.bar(x2,my_loaded_list['epithelial_flx_variation_nhe3'], color= ['black', '#b66dff','#2B9F78'])
+    ax8.set_xlabel('Epithelial Flux_Na[mmol/s.cm2]', color='black')
     plt.setp(plt.gca(), xticklabels=[])
     # ax8.set_ylim(-0.2,8.4)
-    # ax8.legend(shadow=False, fancybox=False, frameon=False)
-    # label=['ES', 'IE', 'IS', 'ME', 'MI','EPTL']
     ax9 = fig.add_subplot(3, 3, 9)
-    ax9.bar(x3, my_loaded_list['epithelial_flx_elct_chmcl_nhe3'], color=['#db6d00', '#b66dff', '#2B9F78'])
+    ax9.bar(x3, my_loaded_list['epithelial_flx_elct_chmcl_nhe3'], color= ['#db6d00', '#b66dff', '#2B9F78'])
     plt.setp(plt.gca(), xticklabels=[])
-    ax9.set_xlabel('Electrochemical Flux_Na [mmol/s.cm2]', color='black')
+    ax9.set_xlabel('Electrochemical Flux_Na[mmol/s.cm2]', color='black')
     # ax9.set_ylim(-0.1,3.8)
-    # ax9.legend(shadow=False, fancybox=False, frameon=False)
 
     for ax, color in zip([ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9], ['black', '#920000', '#2B9F78', 'black', '#920000', '#2B9F78', 'black', '#920000','#2B9F78']):
         for ticks in ax.xaxis.get_ticklines() + ax.yaxis.get_ticklines():
             ticks.set_color(color)
-        for pos in ['top', 'bottom', 'right', 'left']:
+        for pos in['top', 'bottom', 'right', 'left']:
             ax.spines[pos].set_edgecolor(color)
-
     plt.show()
