@@ -35,13 +35,13 @@ fluxes in all different compartments for all the various solutes in the model. T
 The third box indicates the differential equations present in the PCT-epithelial model, 35 in total.
 The differential equations will be updated by the buffer pairs, PH equilibrium, and electroneutrality definitions.
 
+
 .. figure:: BlockDiagram.PNG
    :width: 85%
    :align: center
    :alt: Schematics of the model
 
- A block diagram of the W-PCT-E model.
-
+A block diagram of the W-PCT-E model.
 Modular description
 ===================
 The current Python code divides the mathematical W-PCT-E model into distinct components, which are able to be re-used.
