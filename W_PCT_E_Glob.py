@@ -104,8 +104,8 @@ param_sodium_pumps = 1
 if2007 = 1
 if if2007:
     m = 5
-    pm =15
-    ps =9
+    pm = 15
+    ps = 9
     kco2 = 340.
     # # epithelial model net cotransporters mi  (2007)
     lmi_clhco3 = 0.2000e-08
@@ -121,7 +121,6 @@ if if2007:
     nnhe3 = 0.27500e-08
     #lis_na_clhco3 =  0.0300e-06 #
 else:
-
     m = 1
     pm = 0
     ps = 0
