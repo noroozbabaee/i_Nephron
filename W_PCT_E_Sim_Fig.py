@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import math
 from W_PCT_E_Glob import *
+import scipy.linalg as la
 import pandas as pd
 import matplotlib.cm as cm
 import pickle
@@ -45,7 +46,7 @@ H is the hatch used for identification of the different dataframe"""
     axe.set_title(title)
 
     # Add invisible data to add another legend
-    n= []
+    n = []
     for i in range(n_df):
         n.append(axe.bar(0, 0, color="gray", hatch=H * i))
 
@@ -297,7 +298,7 @@ def buff_activation(q_h_vary, q_h2_vary, lc_h, pk, c_h_vary, c_h2_vary, qi_nh3_c
            q_h_vary = q_h_vary + q_h2_vary
            q_h2_vary = lc_h - pk - lch(c_h_vary, c_h2_vary)
     else:
-        print('No Buffer Effect for phosphate')
+        # print('No Buffer Effect for phosphate')
         pass
     return q_h_vary, q_h2_vary
 
@@ -355,7 +356,6 @@ def nhe3(ci_h, ci_na, ci_nh4, cm_h, cm_na, cm_nh4, param_nah):
         jnah_nh4 = jnah_nh4 + (psnah_nh4 * psnah_na * cxt / sigma_nhe3) * (
                     cmsnah_nh4 * cisnah_na - cisnah_nh4 * cmsnah_na) + (psnah_nh4 * psnah_h * cxt / sigma_nhe3) * (
                                cmsnah_nh4 * cisnah_h - cmsnah_h * cisnah_nh4)
-        # jnah_na_max = cxt * psnah_na * psnah_h / (psnah_na + psnah_h)
         return[jnah_na, jnah_h, jnah_nh4]
 
 
@@ -364,7 +364,31 @@ def matrix(init, h):
 
 
 def eQs(guess, solver):
-    
+    if Figure_5:
+        param_sglt = 0
+        param_clhco3 = 0
+        param_clhco2 = 0
+        param_nah_mi = 0
+        param_nanh4_mi = 0
+        param_nhe3 = 0
+        param_nahco3 = 0
+        param_kcl = 0
+        param_na_cl_hco3 = 0
+        param_sodium_pumps = 1
+
+    else:
+        param_sglt = 1
+        param_clhco3 = 1
+        param_clhco2 = 1
+        param_nah_mi = 1
+        param_nanh4_mi = 1
+        param_nhe3 = 1
+        param_nahco3 = 1
+        param_kcl = 1
+        param_na_cl_hco3 = 1
+        param_sodium_pumps = 1
+
+
     for i in range(len(guess)):
         vars[i][t] = guess[i]
     ae[t] = ae0 * (1 + mua * (pe[t] - pm))
@@ -481,7 +505,6 @@ def eQs(guess, solver):
 
     Cellular_water_fluxes = fivm - fivs - five
 
-    # Convective Fluxes, See Eqs: (37), (38)
     param_csf = 1
     fekm_na = csf(ce_na[t], cm_na, fevm, sme_na, param_csf)
     fekm_na_csf = csf(ce_na[t], cm_na, fevm, sme_na, param_csf)
@@ -730,9 +753,7 @@ def eQs(guess, solver):
     nahco3 = na_hco3(ci_na[t], cs_na, ci_hco3[t], cs_hco3, z_na, z_hco3, vi[t], vs, ais,
                      lis_nahco3, param_nahco3)
     na_is_nahco3 = nahco3[0]
-    # print('na_is_nahco3', na_is_nahco3)
     hco3_is_nahco3 = nahco3[1]
-    # print('hco3_is_nahco3', hco3_is_nahco3)
     kcl = k_cl(ci_k[t], cs_k, ci_cl[t], cs_cl, z_k, z_cl, vi[t], vs, ais, lis_kcl, param_kcl)
     k_is_kcl = kcl[0]
     cl_is_kcl = kcl[1]
@@ -742,7 +763,6 @@ def eQs(guess, solver):
     na_is_na_clhco3 = na_clhco3[0]
     cl_is_na_clhco3 = na_clhco3[1]
     hco3_is_na_clhco3 = na_clhco3[2]
-    #fiks_na = fiks_na  + na_is_na_clhco3
     fiks_na = fiks_na + na_is_nahco3 + na_is_na_clhco3
     fiks_k = fiks_k + k_is_kcl
     fiks_cl = fiks_cl + cl_is_kcl + cl_is_na_clhco3
@@ -765,11 +785,9 @@ def eQs(guess, solver):
     cl_aie_na_clhco3 = na_clhco3_aie[1]
     hco3_aie_na_clhco3 = na_clhco3_aie[2]
     fike_na = fike_na + na_aie_nahco3 + na_aie_na_clhco3
-    #fike_na = fike_na + na_aie_na_clhco3
     fike_k = fike_k + k_aie_kcl
     fike_cl = fike_cl + cl_aie_kcl + cl_aie_na_clhco3
     fike_hco3 = fike_hco3 + hco3_aie_na_clhco3 + hco3_aie_nahco3
-    # fike_hco3 = fike_hco3 + hco3_aie_na_clhco3
     nak = nak_atp(ci_na[t], cs_na, ci_k[t], cs_k,  cs_nh4, param_sodium_pumps)
     atis_na = nak[0]
     atis_k = nak[1]
@@ -1003,8 +1021,8 @@ def eQs(guess, solver):
 
 
 t0 = 0
-tf = 2000
-T = 20000
+tf = 200
+T = 2000
 dt = (tf - t0) / (T - 1)
 rtau = 1 / dt
 
@@ -1026,9 +1044,17 @@ ce_h2co2 = matrix(0.20531685e-06, T)
 ce_gluc = matrix(0.772369e-02, T)
 vi = matrix(-0.549457859e+02, T)
 p_i = matrix(0.0e-01, T)
-ci_na = matrix(0.204436152649e-01, T)
-ci_k = matrix(0.1374233529e+00, T)
-ci_cl = matrix(0.16901004e-01, T)
+# Initial condition for Figure 5
+Figure_5_init = 0
+if Figure_5_init:
+    ci_na = matrix(0.00204436152649e-01, T)
+    ci_k = matrix(0.1374233529e+00, T)
+    ci_cl = matrix(0.0016901004e-01, T)
+else:
+    ci_na = matrix(0.204436152649e-01, T)
+    ci_k = matrix(0.1374233529e+00, T)
+    ci_cl = matrix(0.16901004e-01, T)
+
 ci_hco3 = matrix(0.250905e-01, T)
 ci_h2co3 = matrix(0.4375052e-05, T)
 ci_co2 = matrix(0.1498841868e-02, T)
@@ -1064,7 +1090,6 @@ cs_h = 10. ** (-lchs)
 
 clvl_imp = matrix(0, T)
 flux_na = matrix(0, T)
-# flux_k = matrix(0, T)
 flux_cl = matrix(0, T)
 cl_clhco3 = matrix(0, T)
 cl_kcl = matrix(0, T)
@@ -1125,9 +1150,9 @@ Figure_4a = 0
 Figure_4b = 0
 Figure_4c = 0
 Figure_5 = 0
+Figure_6_7_8 = 0
 Figure_9_10 = 0
-Figure_6_7_8 = 1
-
+Figure_11_12 = 0
 flx = [fekm_na, fekm_cl, fekm_k, fekm_gluc, fikm_na, fikm_cl, fikm_k, fikm_gluc,
       fiks_na, fiks_cl, fiks_k, fiks_gluc, fike_na, fike_cl, fike_k, fike_gluc,
       feks_na, feks_cl, feks_k, feks_gluc, fekm_na_csf, fekm_na_goldman, fikm_na, fikm_na_csf,
@@ -1135,255 +1160,19 @@ flx = [fekm_na, fekm_cl, fekm_k, fekm_gluc, fikm_na, fikm_cl, fikm_k, fikm_gluc,
       fekm_na_csf + fikm_na_csf, flux_na_goldman,
       jnhe3_na + na_mi_nagluc + na_mi_nah2po4, gluc_mi_nagluc, na_nak, hco3_clhco3, Cellular_water_fluxes,
       clvl_imp]
-if Figure_9_10:
-    from PCT_GLOB_new import *
 
-    t = 0
-    guess = [var[t] for var in vars]
-    from scipy import optimize
-
-    mylist = [0.0 for i in range(T)]
-    pm = 15.000
-    cm_cl = 0.11322499
-    cm_na = 0.14
-    cm_gluc = 0.005
-    stepwise = 1
-    if stepwise:
-        cmna = [0.100, 0.110, 0.120, 0.13, 0.140]
-        n_nhe3 = [0.27500e-08, 0.2000e-08, 0.1500e-08, 0.1000e-08, 0.01000e-08]
-        while True:
-            t += 1
-            if t == T:
-                break
-            elif 0 < t <= T / len(cmna):
-                nnhe3 = n_nhe3[0]
-                mylist[t] = n_nhe3[0]
-                result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [var[t] for var in vars]
-                result_flx = eQs(guess, 0)
-                for i in range(len(result_flx)):
-                    flx[i][t] = result_flx[i]
-            elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
-                nnhe3 = n_nhe3[1]
-                mylist[t] = n_nhe3[1]
-                result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [var[t] for var in vars]
-                result_flx = eQs(guess, 0)
-                for i in range(len(result_flx)):
-                    flx[i][t] = result_flx[i]
-            elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
-                nnhe3 = n_nhe3[2]
-                mylist[t] = n_nhe3[2]
-                result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [var[t] for var in vars]
-                result_flx = eQs(guess, 0)
-                for i in range(len(result_flx)):
-                    flx[i][t] = result_flx[i]
-            elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
-                nnhe3 = n_nhe3[3]
-                mylist[t] = n_nhe3[3]
-                result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [var[t] for var in vars]
-                result_flx = eQs(guess, 0)
-                for i in range(len(result_flx)):
-                    flx[i][t] = result_flx[i]
-            elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
-                # lmi_nagluc  = lmi_na_gluc [4]
-                # mylist[t] =lmi_na_gluc [4]
-                # lmi_nah = lmi_na_h[4]
-                # mylist[t] = lmi_na_h[4]
-                nnhe3 = n_nhe3[4]
-                mylist[t] = n_nhe3[4]
-
-                # n_p = l_na_k[4]
-                # mylist[t] = l_na_k[4]
-
-                result = scipy.optimize.root(eQs, np.array(guess), 1)
-                guess = [var[t] for var in vars]
-                result_flx = eQs(guess, 0)
-                for i in range(len(result_flx)):
-                    flx[i][t] = result_flx[i]
-    else:
-        print('Error')
-
-    t = np.linspace(t0, tf, T)
-    t_t = np.transpose(t)
-    mylist = np.asarray(mylist)
-    fig8 = plt.figure(constrained_layout=True)
-    spec2 = gridspec.GridSpec(ncols=1, nrows=4, figure=fig8)
-    ax1 = fig8.add_subplot(spec2[0, 0])
-    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
-    ax1.set_ylabel('L_NHE3', color='blue')
-    ax1.set_title('Figure_10', color='black')
-    ax4 = fig8.add_subplot(spec2[1,0])
-    ax4.plot(t, jnhe3_na, 'b-')
-    ax4.set_ylabel('flux_na_nhe3', color='blue')
-
-    ax2 = fig8.add_subplot(spec2[2, 0])
-    ax2.plot(t, hco3_clhco3, 'b-')
-    ax2.set_ylabel(' flux_hco3_clcho3 ', color='blue')
-
-    ax3 = fig8.add_subplot(spec2[3, 0])
-    ax3.plot(t, na_nak, 'b-')
-    ax3.set_ylabel('flux_Na_nak ', color='blue')
-    ax3.set_xlabel('Time[s] ', color='black')
-    fig3 = plt.figure(constrained_layout=True)
-    spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig3)
-    ax1 = fig3.add_subplot(spec2[0, 0])
-    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
-    ax1.set_ylabel('L_NHE3', color='blue')
-    ax1.set_title('Figure_9', color='black')
-    ax2 = fig3.add_subplot(spec2[1, 0])
-    ax2.plot(t, ci_na, 'b-')
-    ax2.set_ylabel(' ci_na ', color='blue')
-
-    ax3 = fig3.add_subplot(spec2[2, 0])
-    ax3.plot(t, ci_cl, 'b-')
-    ax3.set_ylabel('ci_cl ', color='blue')
-
-    ax4 = fig3.add_subplot(spec2[3, 0])
-    ax4.plot(t, ci_hco3, 'b-')
-    ax4.set_ylabel('ci_hco3 ', color='blue')
-    ax5 = fig3.add_subplot(spec2[4, 0])
-    ax5.plot(t, ci_hco2, 'b-')
-    ax5.set_ylabel('ci_hco2 ', color='blue')
-
-    ax6 = fig3.add_subplot(spec2[5, 0])
-    ax6.plot(t, clvl_imp, 'b-')
-    ax6.set_ylabel('clvl ', color='blue')
-    ax6.set_xlabel('Time[s] ', color='blue')
-    plt.show()
-
-    my_list_Figure_9_10 = {'t': t, 'L_NHE3': mylist, 'flux_na_nah': jnhe3_na, 'flux_hco3_clcho3': hco3_clhco3,
-                           'flux_Na_nak': na_nak, 'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_hco2': ci_hco2,
-                           'ci_hco3': ci_hco3, 'clvl_imp': clvl_imp}
-    print(my_list_Figure_9_10)
-    pickled_list = pickle.dumps(my_list_Figure_9_10)
-    of = open('Data_Figure_9_10.py', 'wb')
-    of.write(pickled_list)
-    of.close()
-if Figure_5:
-    from PCT_GLOB_new import *
-    t = 0
-    guess = [var[t] for var in vars]
-    NaCl = 1
-    scale_per = 0.12
-    cmna = [0.14 + NaCl * j * 0.14 * scale_per for j in range(4)]
-    cmna.append(0.14)
-    cmcl = [0.1132 + NaCl * j * 0.1132 * scale_per for j in range(4)]
-    cmcl.append(0.1132)
-    mylist_na = [0.1 for i in range(T)]
-    mylist_cl = [0.1 for i in range(T)]
-    while True:
-        t += 1
-        if t == T:
-            break
-        elif 0 < t <= T / len(cmna):
-            cm_na = cmna[0]
-            cm_cl = cmcl[0]
-            cs_na = cmna[0]
-            cs_cl = cmcl[0]
-            mylist_na[t] = cmna[0]
-            mylist_cl[t] = cmcl[0]
-            result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
-            result_flx=eQs(guess, 0)
-            for i in range(len(result_flx)):
-                flx[i][t]=result_flx[i]
-        elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
-            mylist_na[t]=cmna[1]
-            mylist_cl[t]=cmcl[1]
-            cm_na=cmna[1]
-            cm_cl=cmcl[1]
-            cs_na=cmna[1]
-            cs_cl=cmcl[1]
-            result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
-            result_flx=eQs(guess, 0)
-            for i in range(len(result_flx)):
-                flx[i][t]=result_flx[i]
-        elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
-            cm_na=cmna[2]
-            cm_cl=cmcl[2]
-            cs_na=cmna[2]
-            cs_cl=cmcl[2]
-            mylist_na[t]=cmna[2]
-            mylist_cl[t]=cmcl[2]
-            result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
-            result_flx=eQs(guess, 0)
-            for i in range(len(result_flx)):
-                flx[i][t]=result_flx[i]
-        elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
-            cm_na=cmna[3]
-            cm_cl=cmcl[3]
-            cs_na=cmna[3]
-            cs_cl=cmcl[3]
-            mylist_na[t]=cmna[3]
-            mylist_cl[t]=cmcl[3]
-            result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
-            result_flx=eQs(guess, 0)
-            for i in range(len(result_flx)):
-                flx[i][t]=result_flx[i]
-        elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
-            cm_na=cmna[4]
-            cm_cl=cmcl[4]
-            cs_na=cmna[4]
-            cs_cl=cmcl[4]
-            mylist_na[t]=cmna[4]
-            mylist_cl[t]=cmcl[4]
-            result=scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
-            result_flx=eQs(guess, 0)
-            for i in range(len(result_flx)):
-                flx[i][t] = result_flx[i]
-        else:
-            print('t is not in a defined range.')
-    t=np.linspace(t0, tf, T)
-    my_list_Figure_5 = {'t': t, 'mylist_na': mylist_na, 'mylist_cl': mylist_cl, 'vm': vm,
-                            'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_k': ci_k }
-    pickled_list = pickle.dumps(my_list_Figure_5)
-    of = open('Data_Figure_5.py', 'wb')
-    of.write(pickled_list)
-    of.close()
-    fig3 = plt.figure(constrained_layout=True)
-    spec2 = gridspec.GridSpec(ncols=1, nrows=5, figure=fig3)
-    ax1 = fig3.add_subplot(spec2[0, 0])
-    ax1.plot(t[0:-2], mylist_na[0:-2], color='#007282', label="Na ")
-    ax1.plot(t[0:-2], mylist_cl[0:-2], color='#b66dff', label="Cl ")
-    ax1.set_ylabel('Cm, Cs', color='black')
-    ax1.set_xlim(-5, tf)
-    ax1.legend(frameon=False)
-    ax0 = fig3.add_subplot(spec2[1, 0])
-    ax0.set_ylabel('Vm', color='black')
-    ax0.plot(t[0:-2], vm[0:-2], 'black')
-    ax0.set_xlim(-5, tf)
-    ax0.set_ylim(0.0, 0.15)
-    ax2 = fig3.add_subplot(spec2[2, 0])
-    ax2.set_ylabel('ci_na', color='black')
-    ax2.plot(t[0:-2], ci_na[0:-2], 'black')
-    ax2.set_xlim(-5, tf)
-    ax3 = fig3.add_subplot(spec2[3, 0])
-    ax3.plot(t[0:-2], ci_k[0:-2], 'black')
-    ax3.set_ylabel('ci_k', color='black')
-    ax3.set_xlim(-5, tf)
-    ax4 = fig3.add_subplot(spec2[4, 0])
-    ax4.plot(t[0:-2], ci_cl[0:-2], 'black')
-    ax4.set_ylabel('ci_cl', color='black')
-    ax4.set_xlim(-5, tf)
-    plt.show()
 if Figure_4a:
-    from PCT_GLOB_new import *
-    mylist_na = [0.1 for i in range(T)]
-    mylist_cl = [0.1 for i in range(T)]
-    mylist_hco3 = [0.1 for i in range(T)]
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 0
+    mylist_na = [ 0.1 for i in range(T) ]
+    mylist_cl = [ 0.1 for i in range(T) ]
+    mylist_hco3 = [ 0.1 for i in range(T) ]
     cm_hco3_0 = 0.004
     cm_hco3_f = 0.05
     slope = (cm_hco3_f - cm_hco3_0) / (tf - t0)
-    mylist_hco3 = [cm_hco3_0 + 0.1 * slope * i for i in range(T)]
+    mylist_hco3 = [ cm_hco3_0 + 0.1 * slope * i for i in range(T) ]
     t = 0
-    guess = [var[t] for var in vars]
+    guess = [ var [ t ] for var in vars ]
 
     while True:
         t += 1
@@ -1395,13 +1184,13 @@ if Figure_4a:
             hmi_h2co2 = 0.05000e00
             his_h2co2 = 0.0600
             hie_h2co2 = 0.0600
-            cm_hco3 = mylist_hco3[t]
+            cm_hco3 = mylist_hco3 [ t ]
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
+            guess = [ var [ t ] for var in vars ]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
-                flx[i][t] = result_flx[i]
-
+                flx [ i ] [ t ] = result_flx [ i ]
+    flux_cl = np.add(fikm_cl, fekm_cl).tolist()
     my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco3': mylist_hco3}
     pickled_list = pickle.dumps(my_list)
     of = open('Data_Figure_4a.py', 'wb')
@@ -1409,67 +1198,72 @@ if Figure_4a:
     of.close()
     fig4 = plt.figure(constrained_layout=True)
     spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4)
-    ax3 = fig4.add_subplot(spec2[0, 0])
+    ax3 = fig4.add_subplot(spec2 [ 0, 0 ])
     ax3.set_ylabel('flux_cl[mmol/sec]', color='black')
     ax3.set_xlabel('cm_hco3[M]', color='black')
     ax3.set_title('Figure_4a', color='black')
-    x1 = ax3.plot(mylist_hco3[30:-2], flux_cl[30:-2], 'black')
-    x2 = ax3.plot(mylist_hco3[30:-2], fikm_cl[30:-2], 'g')
-    x3 = ax3.plot(mylist_hco3[30:-2], fekm_cl[30:-2], 'blue')
-    ax3.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
+    x1 = ax3.plot(mylist_hco3 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
+    x2 = ax3.plot(mylist_hco3 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
+    x3 = ax3.plot(mylist_hco3 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
+    ax3.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
 if Figure_4b:
-    from PCT_GLOB_new import *
-    mylist_hco2 = [0.1 for i in range(T)]
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 0
+    mylist_hco2 = [ 0.1 for i in range(T) ]
     cm_hco2_0 = 0.004
-    cm_hco2_f = 0.05
+    cm_hco2_f = 0.01
     slope = (cm_hco2_f - cm_hco2_0) / (tf - t0)
-    mylist_hco2 = [cm_hco2_0 + 0.1 * slope * i for i in range(T)]
+    mylist_hco2 = [ cm_hco2_0 + 0.1 * slope * i for i in range(T) ]
     t = 0
-    guess = [var[t] for var in vars]
-
+    guess = [ var [ t ] for var in vars ]
     while True:
         t += 1
         if t == T:
             break
         else:
+            # update the model parameters regarding the new experiments
             lmi_clhco3 = 0.5000e-08
             lmi_clhco2 = 2.5000e-08
             hmi_h2co2 = 0.05000e00
             hie_h2co2 = 0.0600
             his_h2co2 = 0.0600
-            cm_hco2 = mylist_hco2[t]
-            cs_hco2 = mylist_hco2[t]
+            cm_hco2 = mylist_hco2 [ t ]
+            cs_hco2 = mylist_hco2 [ t ]
             cm_hco3 = 0.004
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
+            guess = [ var [ t ] for var in vars ]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
-                flx[i][t] = result_flx[i]
-    fig4b = plt.figure(constrained_layout=True)
-    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4b)
-    ax1 = fig4b.add_subplot(spec2[0, 0])
-    ax1.set_title('Figure_4b', color='black')
-    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
-    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
-    x1 = ax1.plot(mylist_hco2[30:-2], flux_cl[30:-2], 'black')
-    x2 = ax1.plot(mylist_hco2[30:-2], fikm_cl[30:-2], 'g')
-    x3 = ax1.plot(mylist_hco2[30:-2], fekm_cl[30:-2], 'blue')
-    ax1.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
-    plt.show()
-    my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco2': mylist_hco2}
-    pickled_list = pickle.dumps(my_list)
+                flx [ i ] [ t ] = result_flx [ i ]
+    flux_cl = np.add(fikm_cl, fekm_cl).tolist()
+    # save the required simulation results
+    my_listb = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco2': mylist_hco2}
+    pickled_list = pickle.dumps(my_listb)
     of = open('Data_Figure_4b.py', 'wb')
     of.write(pickled_list)
     of.close()
+    fig4b = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4b)
+    ax1 = fig4b.add_subplot(spec2 [ 0, 0 ])
+    ax1.set_title('Figure_4b', color='black')
+    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
+    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
+    x1 = ax1.plot(mylist_hco2 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
+    x2 = ax1.plot(mylist_hco2 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
+    x3 = ax1.plot(mylist_hco2 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
+    ax1.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
+    plt.show()
+
 if Figure_4c:
-    from PCT_GLOB_new import *
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 0
     t = 0
-    guess = [var[t] for var in vars]
+    guess = [ var [ t ] for var in vars ]
     cm_hco3 = 0.004
     cm_hco2_0 = 0.004
-    cm_hco2_f = 0.05
+    cm_hco2_f = 0.01
     slope = (cm_hco2_f - cm_hco2_0) / (tf - t0)
-    mylist_hco2 = [cm_hco2_0 + 0.1 * slope * i for i in range(T)]
+    mylist_hco2 = [ cm_hco2_0 + 0.1 * slope * i for i in range(T) ]
     while True:
         t += 1
         if t == T:
@@ -1480,31 +1274,202 @@ if Figure_4c:
             hmi_h2co2 = 0.1 * 0.05000e00
             hie_h2co2 = 0.1 * 0.0600
             his_h2co2 = 0.1 * 0.0600
-            cm_hco2 = mylist_hco2[t]
-            cs_hco2 = mylist_hco2[t]
+            cm_hco2 = mylist_hco2 [ t ]
+            cs_hco2 = mylist_hco2 [ t ]
             result = scipy.optimize.root(eQs, np.array(guess), 1)
-            guess = [var[t] for var in vars]
+            guess = [ var [ t ] for var in vars ]
             result_flx = eQs(guess, 0)
             for i in range(len(result_flx)):
-                flx[i][t] = result_flx[i]
+                flx [ i ] [ t ] = result_flx [ i ]
+    flux_cl = np.add(fikm_cl, fekm_cl).tolist()
+    fig4c = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4c)
+    ax1 = fig4c.add_subplot(spec2 [ 0, 0 ])
+    ax1.set_title('Figure_4c', color='black')
+    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
+    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
+    x1 = ax1.plot(mylist_hco2 [ 30:-2 ], flux_cl [ 30:-2 ], 'black')
+    x2 = ax1.plot(mylist_hco2 [ 30:-2 ], fikm_cl [ 30:-2 ], 'g')
+    x3 = ax1.plot(mylist_hco2 [ 30:-2 ], fekm_cl [ 30:-2 ], 'blue')
+    ax1.legend([ x1 [ 0 ], x2 [ 0 ], x3 [ 0 ] ], [ 'Total Epithelial', 'Cellular', 'Junctional' ])
+    plt.show()
     my_list = {'fekm_cl': fekm_cl, 'fikm_cl': fikm_cl, 'flux_cl': flux_cl, 'mylist_hco2': mylist_hco2}
     pickled_list = pickle.dumps(my_list)
     of = open('Data_Figure_4c.py', 'wb')
     of.write(pickled_list)
     of.close()
-    fig4 = plt.figure(constrained_layout=True)
-    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig4)
-    ax1 = fig4.add_subplot(spec2[0, 0])
-    ax1.set_title('Figure_4c', color='black')
-    ax1.set_ylabel('flux_cl[mmol/sec]', color='black')
-    ax1.set_xlabel('cm_hco2[M] & cs_hco2[M] ', color='black')
-    x1 = ax1.plot(mylist_hco2[30:-2], flux_cl[30:-2], 'black')
-    x2 = ax1.plot(mylist_hco2[30:-2], fikm_cl[30:-2], 'g')
-    x3 = ax1.plot(mylist_hco2[30:-2], fekm_cl[30:-2], 'blue')
-    ax1.legend([x1[0], x2[0], x3[0]],['Total Epithelial', 'Cellular', 'Junctional'])
-if Figure_6_7_8:
 
-    from PCT_GLOB_new import *
+if Figure_5:
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 1
+    scale_latta = 0
+    scale_latta0 = 1
+    hmi_na = 0.00700e-05 * scale_latta0
+    hmi_k = 0.0700e-05 * scale_latta0
+    hmi_cl = 0.025e-05 * scale_latta0
+    hmi_hco3 = 0.05000e-05 * scale_latta0
+    hmi_h2co3 = 0.650e-03 * scale_latta
+    hmi_co2 = 0.7500e-01 * scale_latta
+    hmi_hpo4 = 0.950e-08 * scale_latta
+    hmi_h2po4 = 0.0000e+00 * scale_latta
+    hmi_urea = 0.10500e-05 * scale_latta
+    hmi_nh3 = 0.850e-03 * scale_latta
+    hmi_nh4 = 0.2150e-06 * scale_latta
+    hmi_h = 0.850e-02 * scale_latta
+    hmi_hco2 = 0.0000e+00 * scale_latta
+    sis_h2co2 = 0.950 * scale_latta
+    hmi_h2co2 = 0.05000e00 * scale_latta
+    hmi_gluc = 0.0000e+00 * scale_latta
+    t = 0
+    guess = [ var [ t ] for var in vars ]
+    NaCl = 1
+    scale_per = 0.1
+    cmna = [ 0.001 + NaCl * j * 0.2105 * scale_per for j in range(0, 6) ]
+    cmcl = [ 0.001 + NaCl * j * 0.17 * scale_per for j in range(0, 6) ]
+    mylist_na = [ 0.1 for i in range(T) ]
+    mylist_cl = [ 0.1 for i in range(T) ]
+    Eigen_imag_Fig_5_a = [ 0.0 for i in range(T) ]
+    Eigen_real_Fig_5_a = [ 0.0 for i in range(T) ]
+    Eigen_imag_Fig_5_c = [ 0.0 for i in range(T) ]
+    Eigen_real_Fig_5_c = [ 0.0 for i in range(T) ]
+    n_p = 3.8000e-06
+    while True:
+        t += 1
+        if t == T:
+            break
+        elif 0 < t <= T / len(cmna):
+            cm_na = cmna [ 0 ]
+            cm_cl = cmcl [ 0 ]
+            cs_na = cmna [ 0 ]
+            cs_cl = cmcl [ 0 ]
+            mylist_na [ t ] = cmna [ 0 ]
+            mylist_cl [ t ] = cmcl [ 0 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            rr_a = result.fjac
+            eig_value, eig_vector = la.eig(rr_a)
+            A = np.sort_complex(eig_value)
+            A_real = -A.real [ -1 ]
+            A_imag = A.imag [ -1 ] / (2 * math.pi)
+            Eigen_real_Fig_5_a [ t ] = A_real
+            Eigen_imag_Fig_5_a [ t ] = A_imag
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
+            mylist_na [ t ] = cmna [ 1 ]
+            mylist_cl [ t ] = cmcl [ 1 ]
+            cm_na = cmna [ 1 ]
+            cm_cl = cmcl [ 1 ]
+            cs_na = cmna [ 1 ]
+            cs_cl = cmcl [ 1 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
+            cm_na = cmna [ 2 ]
+            cm_cl = cmcl [ 2 ]
+            cs_na = cmna [ 2 ]
+            cs_cl = cmcl [ 2 ]
+            mylist_na [ t ] = cmna [ 2 ]
+            mylist_cl [ t ] = cmcl [ 2 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            rr_c = result.fjac
+            eig_value, eig_vector = la.eig(rr_c)
+            A = np.sort_complex(eig_value)
+            A_real = -A.real [ -1 ]
+            A_imag = A.imag [ -1 ] / (2 * math.pi)
+            Eigen_real_Fig_5_c [ t ] = A_real
+            Eigen_imag_Fig_5_c [ t ] = A_imag
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
+            cm_na = cmna [ 3 ]
+            cm_cl = cmcl [ 3 ]
+            cs_na = cmna [ 3 ]
+            cs_cl = cmcl [ 3 ]
+            mylist_na [ t ] = cmna [ 3 ]
+            mylist_cl [ t ] = cmcl [ 3 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
+            cm_na = cmna [ 4 ]
+            cm_cl = cmcl [ 4 ]
+            cs_na = cmna [ 4 ]
+            cs_cl = cmcl [ 4 ]
+            mylist_na [ t ] = cmna [ 4 ]
+            mylist_cl [ t ] = cmcl [ 4 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        elif 5 * T / len(cmna) < t <= 6 * T / len(cmna):
+            param_sodium_pumps = 1
+            n_p = 0.40e-06
+            cm_na = cmna [ 5 ]
+            cm_cl = cmcl [ 5 ]
+            cs_na = cmna [ 5 ]
+            cs_cl = cmcl [ 5 ]
+            mylist_na [ t ] = cmna [ 5 ]
+            mylist_cl [ t ] = cmcl [ 5 ]
+            result = scipy.optimize.root(eQs, np.array(guess), 1)
+            guess = [ var [ t ] for var in vars ]
+            result_flx = eQs(guess, 0)
+            for i in range(len(result_flx)):
+                flx [ i ] [ t ] = result_flx [ i ]
+        else:
+            print('t is not in a defined range.')
+    t = np.linspace(t0, tf, T)
+    Eigen_real_Fig_5_a = [ round(i, 2) for i in Eigen_real_Fig_5_a ]
+    Eigen_real_Fig_5_c = [ round(i, 2) for i in Eigen_real_Fig_5_c ]
+    my_list_Figure_5 = {'t': t, 'mylist_na': mylist_na, 'mylist_cl': mylist_cl, 'vm': vm,
+                        'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_k': ci_k, 'Eigen_real_Fig_5_a': Eigen_real_Fig_5_a,
+                        'Eigen_imag_Fig_5_a': Eigen_imag_Fig_5_a, 'Eigen_real_Fig_5_c': Eigen_real_Fig_5_c,
+                        'Eigen_imag_Fig_5_c': Eigen_imag_Fig_5_c}
+    pickled_list = pickle.dumps(my_list_Figure_5)
+    of = open('Data_Figure_5.py', 'wb')
+    of.write(pickled_list)
+    of.close()
+
+    fig1 = plt.figure(constrained_layout=False, figsize=(5, 1))
+    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig1)
+    ax0 = fig1.add_subplot(spec2 [ 0, 0 ])
+    ax0.plot(t, Eigen_real_Fig_5_a, 'b-')
+    ax0.set_ylabel('Real Part', color='blue')
+
+    fig2 = plt.figure(constrained_layout=False, figsize=(5, 1))
+    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig2)
+    ax = fig2.add_subplot(spec2 [ 0, 0 ])
+    ax.plot(t, Eigen_real_Fig_5_c, 'b-')
+    ax.set_ylabel('Real Part', color='blue')
+
+    fig3 = plt.figure(constrained_layout=False, figsize=(5, 1))
+    spec2 = gridspec.GridSpec(ncols=1, nrows=1, figure=fig3)
+    ax1 = fig3.add_subplot(spec2 [ 0, 0 ])
+    ax1.plot(t [ 10:-2 ], mylist_na [ 10:-2 ], color='#007282', label="Na ")
+    ax1.plot(t [ 10:-2 ], mylist_cl [ 10:-2 ], color='#b66dff', label="Cl ")
+    ax1.set_ylabel('Cm, Cs', color='black')
+    ax1.legend(frameon=False)
+
+    fig4 = plt.figure(constrained_layout=False, figsize=(5, 4))
+    ax1 = fig4.add_subplot(spec2 [ 0, 0 ])
+    ax1.set_ylabel('ci_na ', color='black')
+    ax1.plot(t [ 10:-2 ], ci_cl [ 10:-2 ], color='#b66dff', label="Cl ")
+    ax1.plot(t [ 10:-2 ], ci_na [ 10:-2 ], color='#007282', label="Na ")
+    ax1.set_xlim(-5, 2000)
+    plt.show()
+
+if Figure_6_7_8:
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 0
     t = 0
     guess = [var[t] for var in vars]
     while True:
@@ -1627,7 +1592,6 @@ if Figure_6_7_8:
                       'feks':[feks_na[-1], feks_k[-1], feks_cl[-1], feks_gluc[-1]]}
 
     slt_con_nahco3 = {'Na': ci_na[-1],  'K': ci_k[-1], 'Cl':ci_cl[-1], 'Gluc': ci_gluc[-1]}
-    # print('ci_k[-1]',ci_k[-1])
     from collections import defaultdict
     my_list_Figure6A = defaultdict(list)
     for d in (my_list_default, my_list_nak, my_list_kcl, my_list_nahco3):
@@ -1783,32 +1747,7 @@ if Figure_6_7_8:
 
     plt.figure(12, figsize=(12, 12))
     plot_clustered_stacked([df1, df2, df3, df4],["Na", "K", "Cl", "Gluc"], title= "Figure_6A, Membrane Fluxes[mmol/s.cm2]")
-#    plt.savefig('Figure_6A' + '.png')
-#     of = open('Data_Figure_8A.py', 'rb')
-#     read_file = of.read()
-#     my_loaded_list = pickle.loads(read_file)
-#     of.close()
-#
-#     flux_na = np.array( my_loaded_list['na'])
-#     flux_k = np.array(my_loaded_list['k'])
-#     flux_cl = np.array(my_loaded_list['cl'])
-#     flux_gluc = np.array(my_loaded_list['gluc'])
-#     df1 = pd.DataFrame(flux_na,
-#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
-#                        columns= ["EM", "IM", "IS", "IE", "ES"])
-#     df2 = pd.DataFrame(flux_k,
-#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
-#                        columns= ["EM", "IM", "IS", "IE", "ES"])
-#     df3 = pd.DataFrame(flux_cl,
-#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
-#                        columns= ["EM", "IM", "IS", "IE", "ES"])
-#     df4 = pd.DataFrame(flux_gluc,
-#                        index= ["A Original Setup", " B NHE3 = 0", "C SGLT = 0", "D NaH2PO4 = 0"],
-#                        columns= ["EM", "IM", "IS", "IE", "ES"])
-#
-#     plt.figure(18, figsize=(12, 12))
-#     plot_clustered_stacked([df1, df2, df3,df4],["Na", "K", "Cl", "Gluc"], title="Figure_8A, Membrane Fluxes[mmol/s.cm2]")
-    # plt.savefig('Figure_8A' + '.png')
+
     of = open('Data_Figure_6B.py', 'rb')
     read_file = of.read()
     my_loaded_list1 = pickle.loads(read_file)
@@ -1932,3 +1871,266 @@ if Figure_6_7_8:
         for pos in['top', 'bottom', 'right', 'left']:
             ax.spines[pos].set_edgecolor(color)
     plt.show()
+if Figure_9_10:
+    from W_PCT_E_Glob import *
+    # Make Sure that Figure_5_init = 0
+    t = 0
+    guess = [var[t] for var in vars]
+    from scipy import optimize
+
+    mylist = [0.0 for i in range(T)]
+    pm = 15.000
+    cm_cl = 0.11322499
+    cm_na = 0.14
+    cm_gluc = 0.005
+    stepwise = 1
+    if stepwise:
+        cmna = [0.100, 0.110, 0.120, 0.13, 0.140]
+        n_nhe3 = [0.27500e-08, 0.2000e-08, 0.1500e-08, 0.1000e-08, 0.01000e-08]
+        while True:
+            t += 1
+            if t == T:
+                break
+            elif 0 < t <= T / len(cmna):
+                nnhe3 = n_nhe3[0]
+                mylist[t] = n_nhe3[0]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [var[t] for var in vars]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx[i][t] = result_flx[i]
+            elif 1 * T / len(cmna) < t <= 2 * T / len(cmna):
+                nnhe3 = n_nhe3[1]
+                mylist[t] = n_nhe3[1]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [var[t] for var in vars]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx[i][t] = result_flx[i]
+            elif 2 * T / len(cmna) < t <= 3 * T / len(cmna):
+                nnhe3 = n_nhe3[2]
+                mylist[t] = n_nhe3[2]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [var[t] for var in vars]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx[i][t] = result_flx[i]
+            elif 3 * T / len(cmna) < t <= 4 * T / len(cmna):
+                nnhe3 = n_nhe3[3]
+                mylist[t] = n_nhe3[3]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [var[t] for var in vars]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx[i][t] = result_flx[i]
+            elif 4 * T / len(cmna) < t <= 5 * T / len(cmna):
+                # lmi_nagluc  = lmi_na_gluc [4]
+                # mylist[t] =lmi_na_gluc [4]
+                # lmi_nah = lmi_na_h[4]
+                # mylist[t] = lmi_na_h[4]
+                nnhe3 = n_nhe3[4]
+                mylist[t] = n_nhe3[4]
+
+                # n_p = l_na_k[4]
+                # mylist[t] = l_na_k[4]
+
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [var[t] for var in vars]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx[i][t] = result_flx[i]
+    else:
+        print('Error')
+
+    t = np.linspace(t0, tf, T)
+    t_t = np.transpose(t)
+    mylist = np.asarray(mylist)
+    fig8 = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=4, figure=fig8)
+    ax1 = fig8.add_subplot(spec2[0, 0])
+    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
+    ax1.set_ylabel('L_NHE3', color='blue')
+    ax1.set_title('Figure_10', color='black')
+    ax4 = fig8.add_subplot(spec2[1,0])
+    ax4.plot(t, jnhe3_na, 'b-')
+    ax4.set_ylabel('flux_na_nhe3', color='blue')
+
+    ax2 = fig8.add_subplot(spec2[2, 0])
+    ax2.plot(t, hco3_clhco3, 'b-')
+    ax2.set_ylabel(' flux_hco3_clcho3 ', color='blue')
+
+    ax3 = fig8.add_subplot(spec2[3, 0])
+    ax3.plot(t, na_nak, 'b-')
+    ax3.set_ylabel('flux_Na_nak ', color='blue')
+    ax3.set_xlabel('Time[s] ', color='black')
+    fig3 = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig3)
+    ax1 = fig3.add_subplot(spec2[0, 0])
+    ax1.plot(t[0:-2], mylist[0:-2], 'r-')
+    ax1.set_ylabel('L_NHE3', color='blue')
+    ax1.set_title('Figure_9', color='black')
+    ax2 = fig3.add_subplot(spec2[1, 0])
+    ax2.plot(t, ci_na, 'b-')
+    ax2.set_ylabel(' ci_na ', color='blue')
+
+    ax3 = fig3.add_subplot(spec2[2, 0])
+    ax3.plot(t, ci_cl, 'b-')
+    ax3.set_ylabel('ci_cl ', color='blue')
+
+    ax4 = fig3.add_subplot(spec2[3, 0])
+    ax4.plot(t, ci_hco3, 'b-')
+    ax4.set_ylabel('ci_hco3 ', color='blue')
+    ax5 = fig3.add_subplot(spec2[4, 0])
+    ax5.plot(t, ci_hco2, 'b-')
+    ax5.set_ylabel('ci_hco2 ', color='blue')
+
+    ax6 = fig3.add_subplot(spec2[5, 0])
+    ax6.plot(t, clvl_imp, 'b-')
+    ax6.set_ylabel('clvl ', color='blue')
+    ax6.set_xlabel('Time[s] ', color='blue')
+    plt.show()
+
+    my_list_Figure_9_10 = {'t': t, 'L_NHE3': mylist, 'flux_na_nah': jnhe3_na, 'flux_hco3_clcho3': hco3_clhco3,
+                           'flux_Na_nak': na_nak, 'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_hco2': ci_hco2,
+                           'ci_hco3': ci_hco3, 'clvl_imp': clvl_imp}
+
+    pickled_list = pickle.dumps(my_list_Figure_9_10)
+    of = open('Data_Figure_9_10.py', 'wb')
+    of.write(pickled_list)
+    of.close()
+
+if Figure_11_12:
+    from W_PCT_E_Glob import *
+    t = 0
+    guess = [ var [ t ] for var in vars ]
+    mylist = [ 0.0 for i in range(T) ]
+    Eigen_imag_Fig_11_a = [ 0.0 for i in range(T) ]
+    Eigen_real_Fig_11_a = [ 0.0 for i in range(T) ]
+    Eigen_imag_Fig_11_e = [ 0.0 for i in range(T) ]
+    Eigen_real_Fig_11_e = [ 0.0 for i in range(T) ]
+    pm = 15.000
+    cm_cl = 0.11322499
+    cm_na = 0.14
+    cm_gluc = 0.005
+    stepwise = 1
+    if stepwise:
+        n_pp = [3.0e-7, 2.0e-7, 1.0e-7, 0.50e-7, 0.0]
+        while True:
+            t += 1
+            if t == T:
+                break
+            elif 0 < t <= T / len(n_pp):
+                n_p = n_pp [ 0 ]
+                mylist [ t ] = n_pp [ 0 ]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                rr = result.fjac
+                eig_value, eig_vector = la.eig(rr)
+                A = np.sort_complex(eig_value)
+                A_real = -A.real [ -1 ]
+                A_imag = A.imag [ -1 ] / (2 * math.pi)
+                Eigen_real_Fig_11_a [ t ] = A_real
+                Eigen_imag_Fig_11_a [ t ] = A_imag
+                guess = [ var [ t ] for var in vars ]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx [ i ] [ t ] = result_flx [ i ]
+            elif 1 * T / len(n_pp) < t <= 2 * T / len(n_pp):
+                n_p = n_pp [ 1 ]
+                mylist [ t ] = n_pp [ 1 ]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [ var [ t ] for var in vars ]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx [ i ] [ t ] = result_flx [ i ]
+            elif 2 * T / len(n_pp) < t <= 3 * T / len(n_pp):
+                n_p = n_pp [ 2 ]
+                mylist [ t ] = n_pp [ 2 ]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [ var [ t ] for var in vars ]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx [ i ] [ t ] = result_flx [ i ]
+            elif 3 * T / len(n_pp) < t <= 4 * T / len(n_pp):
+                n_p = n_pp [ 3]
+                mylist [ t ] = n_pp [ 3 ]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                guess = [ var [ t ] for var in vars ]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx [ i ] [ t ] = result_flx [ i ]
+            elif 4 * T / len(n_pp) < t <= 5 * T / len(n_pp):
+                n_p = n_pp [ 4 ]
+                mylist [ t ] = n_pp [ 4 ]
+                result = scipy.optimize.root(eQs, np.array(guess), 1)
+                rr = result.fjac
+                eig_value, eig_vector = la.eig(rr)
+                A = np.sort_complex(eig_value)
+                A_real = -A.real [ -1 ]
+                A_imag = A.imag [ -1 ] / (2 * math.pi)
+                Eigen_real_Fig_11_e [ t ] = A_real
+                Eigen_imag_Fig_11_e [ t ] = A_imag
+                guess = [ var [ t ] for var in vars ]
+                result_flx = eQs(guess, 0)
+                for i in range(len(result_flx)):
+                    flx [ i ] [ t ] = result_flx [ i ]
+    else:
+        print('Error')
+
+    t = np.linspace(t0, tf, T)
+    t_t = np.transpose(t)
+    mylist = np.asarray(mylist)
+
+    fig8 = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=4, figure=fig8)
+    ax1 = fig8.add_subplot(spec2 [ 0, 0 ])
+    ax1.plot(t [ 0:-2 ], mylist [ 0:-2 ], 'r-')
+    ax1.set_ylabel('L_NaK', color='blue')
+    ax1.set_title('Figure_12', color='black')
+
+    ax2 = fig8.add_subplot(spec2 [ 1, 0 ])
+    ax2.plot(t, na_nak, 'b-')
+    ax2.set_ylabel('flux_Na_nak ', color='blue')
+
+    ax3 = fig8.add_subplot(spec2 [ 2, 0 ])
+    ax3.plot(t, hco3_clhco3, 'b-')
+    ax3.set_ylabel(' flux_hco3_clcho3 ', color='blue')
+
+    ax4 = fig8.add_subplot(spec2 [ 3, 0 ])
+    ax4.plot(t, jnhe3_na, 'b-')
+    ax4.set_ylabel('flux_na_nhe3', color='blue')
+    ax4.set_xlabel('Time[s] ', color='black')
+
+    fig3 = plt.figure(constrained_layout=True)
+    spec2 = gridspec.GridSpec(ncols=1, nrows=6, figure=fig3)
+    ax1 = fig3.add_subplot(spec2 [ 0, 0 ])
+    ax1.plot(t [ 0:-2 ], mylist [ 0:-2 ], 'r-')
+    ax1.set_ylabel('L_NaK', color='blue')
+    ax1.set_title('Figure_11', color='black')
+    ax2 = fig3.add_subplot(spec2 [ 1, 0 ])
+    ax2.plot(t, ci_na, 'b-')
+    ax2.set_ylabel(' ci_na ', color='blue')
+    ax3 = fig3.add_subplot(spec2 [ 2, 0 ])
+    ax3.plot(t, ci_cl, 'b-')
+    ax3.set_ylabel('ci_cl ', color='blue')
+    ax4 = fig3.add_subplot(spec2 [ 3, 0 ])
+    ax4.plot(t, ci_hco3, 'b-')
+    ax4.set_ylabel('ci_hco3 ', color='blue')
+    ax5 = fig3.add_subplot(spec2 [ 4, 0 ])
+    ax5.plot(t, ci_hco2, 'b-')
+    ax5.set_ylabel('ci_hco2 ', color='blue')
+    ax6 = fig3.add_subplot(spec2 [ 5, 0 ])
+    ax6.plot(t, clvl_imp, 'b-')
+    ax6.set_ylabel('clvl ', color='blue')
+    ax6.set_xlabel('Time[s] ', color='blue')
+    plt.show()
+
+    my_list_Figure_11_12 = {'t': t, 'L_NaK': mylist, 'flux_na_nah': jnhe3_na, 'flux_hco3_clcho3': hco3_clhco3,
+                           'flux_Na_nak': na_nak, 'ci_na': ci_na, 'ci_cl': ci_cl, 'ci_hco2': ci_hco2,
+                           'ci_hco3': ci_hco3, 'clvl_imp': clvl_imp, 'Eigen_real_Fig_11_a': Eigen_real_Fig_11_a,
+                           'Eigen_imag_Fig_11_a': Eigen_imag_Fig_11_a, 'Eigen_real_Fig_11_e': Eigen_real_Fig_11_e,
+                           'Eigen_imag_Fig_11_e': Eigen_imag_Fig_11_e}
+
+    pickled_list = pickle.dumps(my_list_Figure_11_12)
+    of = open('Data_Figure_11_12.py', 'wb')
+    of.write(pickled_list)
+    of.close()
