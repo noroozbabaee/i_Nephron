@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 import altair as alt
-import scipy
-import scipy.optimize
+# import scipy
+# import scipy.optimize
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from matplotlib.pyplot import figure
-import math
+# from matplotlib.pyplot import figure
+# import math
 import pickle
 
 Figure_4 = 0
